@@ -28,6 +28,10 @@ import { TimeService } from '@common/services/time.service';
     ScheduleService,
     TimeService,
   ],
-  exports: [PaymentOrchestratorService, PaymentProcessorService],
+  exports: [
+    PaymentOrchestratorService,
+    PaymentProcessorService,
+    PaystackProvider,
+  ],
 })
 export class PaymentModule {}
