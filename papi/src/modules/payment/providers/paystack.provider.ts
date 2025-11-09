@@ -11,6 +11,22 @@ import {
   BankInfo,
 } from '../interfaces/payment-provider.interface';
 
+export interface PaymentCollectionParams {
+  amount: number;
+  email: string;
+  reference: string;
+  metadata?: Record<string, any>;
+  callbackUrl?: string;
+}
+
+export interface PaymentCollectionResponse {
+  success: boolean;
+  authorizationUrl: string;
+  accessCode: string;
+  reference: string;
+  message?: string;
+}
+
 @Injectable()
 export class PaystackProvider implements IPaymentProvider {
   private readonly logger = new Logger(PaystackProvider.name);
@@ -94,23 +110,79 @@ export class PaystackProvider implements IPaymentProvider {
     }
   }
 
+  async initializePaymentCollection(
+    params: PaymentCollectionParams,
+  ): Promise<PaymentCollectionResponse> {
+    try {
+      const payload = {
+        email: params.email,
+        amount: params.amount * 100,
+        reference: params.reference,
+        metadata: params.metadata,
+        callback_url: params.callbackUrl,
+        currency: 'NGN',
+      };
+
+      const response = (await this.makeRequest(
+        '/transaction/initialize',
+        'POST',
+        payload,
+      )) as {
+        status: boolean;
+        message: string;
+        data: {
+          authorization_url: string;
+          access_code: string;
+          reference: string;
+        };
+      };
+
+      if (!response.status) {
+        return {
+          success: false,
+          authorizationUrl: '',
+          accessCode: '',
+          reference: params.reference,
+          message: response.message || 'Failed to initialize payment',
+        };
+      }
+
+      return {
+        success: true,
+        authorizationUrl: response.data.authorization_url,
+        accessCode: response.data.access_code,
+        reference: response.data.reference,
+        message: response.message,
+      };
+    } catch (error) {
+      this.logger.error(
+        'Paystack payment collection initialization failed',
+        error,
+      );
+      return {
+        success: false,
+        authorizationUrl: '',
+        accessCode: '',
+        reference: params.reference,
+        message: (error as Error).message,
+      };
+    }
+  }
+
   async verifyPayment(reference: string): Promise<PaymentVerificationResponse> {
     try {
       const response = await this.makeRequest(
-        `/transfer/verify/${reference}`,
+        `/transaction/verify/${reference}`,
         'GET',
       );
-
-      const recipientDetails = (
-        response.data?.recipient as { details: { account_number: string } }
-      )?.details;
 
       return {
         success: response.status,
         status: this.mapStatus(response.data?.status as string),
         reference: reference,
-        amount: response.data?.amount / 100,
-        recipientAccount: recipientDetails?.account_number,
+        amount: (response.data?.amount as number) / 100 || 0,
+        recipientAccount:
+          (response.data?.customer as { email?: string })?.email || '',
         message: response.message,
         data: response.data,
       };

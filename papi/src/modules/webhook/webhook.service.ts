@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import {
   Transaction,
   TransactionStatus,
+  TransactionType,
 } from '../transaction/entities/transaction.entity';
 import { PaystackProvider } from '../payment/providers/paystack.provider';
 import { WalletService } from '../wallet/wallet.service';
@@ -45,6 +46,9 @@ export class WebhookService {
         break;
       case 'transfer.reversed':
         await this.handleTransferReversed(data);
+        break;
+      case 'charge.success':
+        await this.handleChargeSuccess(data);
         break;
       default:
         this.logger.log(`Unhandled Paystack event: ${event}`);
@@ -147,11 +151,50 @@ export class WebhookService {
     this.logger.log(`Transaction ${transaction.id} reversed and refunded`);
   }
 
+  private async handleChargeSuccess(data: Record<string, any>): Promise<void> {
+    const transaction = await this.findTransactionByReference(
+      data.reference as string,
+    );
+
+    if (!transaction) {
+      this.logger.warn(
+        `Transaction not found for reference: ${data.reference}`,
+      );
+      return;
+    }
+
+    if (transaction.type !== TransactionType.WALLET_FUNDING) {
+      return;
+    }
+
+    if (transaction.isSuccessful()) {
+      this.logger.log(
+        `Transaction ${transaction.id} already marked as successful`,
+      );
+      return;
+    }
+
+    transaction.status = TransactionStatus.SUCCESS;
+    transaction.completedAt = new Date();
+    transaction.providerResponse = data;
+
+    await this.transactionRepository.save(transaction);
+
+    await this.walletService.creditWallet(
+      transaction.userId,
+      Number(transaction.amount),
+    );
+
+    this.logger.log(
+      `Wallet funding transaction ${transaction.id} completed and wallet credited`,
+    );
+  }
+
   private async findTransactionByReference(
     reference: string,
   ): Promise<Transaction | null> {
     return this.transactionRepository.findOne({
-      where: { id: reference },
+      where: [{ providerReference: reference }, { id: reference }],
     });
   }
 }

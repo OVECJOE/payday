@@ -27,3 +27,18 @@ export async function getBalanceAction() {
   }
 }
 
+export async function fundWalletAction(formData: FormData) {
+  try {
+    const { token } = await requireAuth();
+    const amount = parseFloat(formData.get('amount') as string);
+    const email = formData.get('email') as string;
+
+    const result = await api.wallet.fund(token, { amount, email });
+    return { success: true, data: result };
+  } catch (error) {
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return { error: 'Failed to initialize wallet funding' };
+  }
+}

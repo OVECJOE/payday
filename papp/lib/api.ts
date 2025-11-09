@@ -339,6 +339,15 @@ export const api = {
         available: number;
         locked: number;
       }>('/wallet/balance', { method: 'GET' }, token),
+
+    fund: (token: string, data: { amount: number; email: string }) =>
+      fetchWithAuth<{
+        authorizationUrl: string;
+        reference: string;
+      }>('/wallet/fund', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, token),
   },
 
   transactions: {
