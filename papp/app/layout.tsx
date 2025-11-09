@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
-import { Aclonica, Advent_Pro } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
-const aclonica = Aclonica({
-  subsets: ["latin", 'latin-ext'],
-  weight: ["400"],
-  variable: "--font-aclonica",
-});
-
-const adventPro = Advent_Pro({
-  subsets: ["latin", 'latin-ext'],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-advent-pro",
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin", "latin-ext"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-space-grotesk",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -41,7 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${aclonica.variable} ${adventPro.variable} font-sans antialiased`}>
+      <body className={`${spaceGrotesk.variable} font-sans antialiased`}>
         {children}
         <Toaster />
       </body>
