@@ -90,10 +90,8 @@ export function CreateRecipientDialog({
           const result = await validateBankAccountAction(accountNumber, bankCode);
           if (result.valid && result.accountName) {
             setAccountName(result.accountName);
-            toast.success(`Account verified: ${result.accountName}`);
           } else {
             setAccountName(null);
-            toast.error('Account validation failed');
           }
         } catch {
           setAccountName(null);
@@ -109,8 +107,8 @@ export function CreateRecipientDialog({
   }, [accountNumber, bankCode]);
 
   const onSubmit = async (data: RecipientFormData) => {
-    if (!accountName) {
-      toast.error('Please validate the account number first');
+    if (isValidating) {
+      toast.error('Please wait for account validation to complete');
       return;
     }
 
@@ -199,8 +197,13 @@ export function CreateRecipientDialog({
               {isValidating && (
                 <p className="text-sm text-muted-foreground">Validating account...</p>
               )}
-              {accountName && (
-                <p className="text-sm text-green-600">Account name: {accountName}</p>
+              {accountName && !isValidating && (
+                <p className="text-sm text-green-600 dark:text-green-400">✓ Account verified: {accountName}</p>
+              )}
+              {!accountName && !isValidating && accountNumber && bankCode && accountNumber.length >= 10 && (
+                <p className="text-sm text-amber-600 dark:text-amber-400">
+                  Validation pending or failed. You can still proceed to create the recipient.
+                </p>
               )}
               {errors.accountNumber && (
                 <p className="text-sm text-destructive">{errors.accountNumber.message}</p>
@@ -255,7 +258,7 @@ export function CreateRecipientDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading || !accountName}>
+            <Button type="submit" disabled={isLoading || isValidating}>
               {isLoading ? 'Creating...' : 'Create Recipient'}
             </Button>
           </DialogFooter>
