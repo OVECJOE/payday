@@ -331,6 +331,9 @@ export const api = {
         method: 'POST',
       }, token),
 
+    delete: (id: string, token: string) =>
+      fetchWithAuth<void>(`/schedules/${id}`, { method: 'DELETE' }, token),
+
     stats: (token: string) =>
       fetchWithAuth<{
         total: number;

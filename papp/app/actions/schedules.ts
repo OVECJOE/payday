@@ -137,3 +137,16 @@ export async function getScheduleStatsAction() {
   }
 }
 
+export async function deleteScheduleAction(id: string) {
+  try {
+    const { token } = await requireAuth();
+    await api.schedules.delete(id, token);
+    revalidatePath('/dashboard/schedules');
+    return { success: true };
+  } catch (error) {
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return { error: 'Failed to delete schedule' };
+  }
+}

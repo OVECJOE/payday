@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Delete,
   Body,
   Param,
   Query,
@@ -99,5 +100,14 @@ export class ScheduleController {
     @Param('id') scheduleId: string,
   ): Promise<RecurringSchedule> {
     return this.scheduleService.cancelSchedule(scheduleId, userId);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteSchedule(
+    @CurrentUser('id') userId: string,
+    @Param('id') scheduleId: string,
+  ): Promise<void> {
+    await this.scheduleService.deleteSchedule(scheduleId, userId);
   }
 }

@@ -10,18 +10,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { pauseScheduleAction, resumeScheduleAction, cancelScheduleAction } from '@/app/actions/schedules';
+import { pauseScheduleAction, resumeScheduleAction, cancelScheduleAction, deleteScheduleAction } from '@/app/actions/schedules';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/format';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import type { Schedule } from '@/lib/types';
 
 interface ScheduleCardProps {
   schedule: Schedule;
   onUpdated: () => void;
+  onViewDetails: (schedule: Schedule) => void;
 }
 
-export function ScheduleCard({ schedule, onUpdated }: ScheduleCardProps) {
+export function ScheduleCard({ schedule, onUpdated, onViewDetails }: ScheduleCardProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handlePause = async () => {
     setIsLoading(true);
@@ -48,9 +52,6 @@ export function ScheduleCard({ schedule, onUpdated }: ScheduleCardProps) {
   };
 
   const handleCancel = async () => {
-    if (!confirm('Are you sure you want to cancel this schedule?')) {
-      return;
-    }
     setIsLoading(true);
     const result = await cancelScheduleAction(schedule.id);
     setIsLoading(false);
@@ -58,6 +59,18 @@ export function ScheduleCard({ schedule, onUpdated }: ScheduleCardProps) {
       toast.error(result.error);
     } else {
       toast.success('Schedule cancelled');
+      onUpdated();
+    }
+  };
+
+  const handleDelete = async () => {
+    setIsLoading(true);
+    const result = await deleteScheduleAction(schedule.id);
+    setIsLoading(false);
+    if (result?.error) {
+      toast.error(result.error);
+    } else {
+      toast.success('Schedule deleted');
       onUpdated();
     }
   };
@@ -70,39 +83,51 @@ export function ScheduleCard({ schedule, onUpdated }: ScheduleCardProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <CardTitle className="text-lg">
-              {schedule.recipient?.name || 'Recipient'}
-            </CardTitle>
-            <CardDescription>
-              {formatCurrency(schedule.amount)} • {frequencyLabels[schedule.frequency] || schedule.frequency}
-            </CardDescription>
+    <>
+      <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onViewDetails(schedule)}>
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <div className="space-y-1 flex-1" onClick={(e) => e.stopPropagation()}>
+              <CardTitle className="text-lg">
+                {schedule.recipient?.name || 'Recipient'}
+              </CardTitle>
+              <CardDescription>
+                {formatCurrency(schedule.amount)} • {frequencyLabels[schedule.frequency] || schedule.frequency}
+              </CardDescription>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                <Button variant="ghost" size="sm" disabled={isLoading}>•••</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {schedule.status === 'active' ? (
+                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handlePause(); }} disabled={isLoading}>
+                    Pause
+                  </DropdownMenuItem>
+                ) : schedule.status === 'paused' ? (
+                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleResume(); }} disabled={isLoading}>
+                    Resume
+                  </DropdownMenuItem>
+                ) : null}
+                {schedule.status !== 'cancelled' && (
+                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setShowCancelDialog(true); }} disabled={isLoading}>
+                    Cancel
+                  </DropdownMenuItem>
+                )}
+                {schedule.status === 'cancelled' && (
+                  <DropdownMenuItem 
+                    onClick={(e) => { e.stopPropagation(); setShowDeleteDialog(true); }} 
+                    disabled={isLoading}
+                    className="text-destructive"
+                  >
+                    Delete
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" disabled={isLoading}>•••</Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {schedule.status === 'active' ? (
-                <DropdownMenuItem onClick={handlePause} disabled={isLoading}>
-                  Pause
-                </DropdownMenuItem>
-              ) : schedule.status === 'paused' ? (
-                <DropdownMenuItem onClick={handleResume} disabled={isLoading}>
-                  Resume
-                </DropdownMenuItem>
-              ) : null}
-              <DropdownMenuItem onClick={handleCancel} disabled={isLoading}>
-                Cancel
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </CardHeader>
-      <CardContent>
+        </CardHeader>
+        <CardContent>
         <div className="space-y-2 text-sm">
           <div>
             <span className="text-muted-foreground">Next run:</span>{' '}
@@ -140,6 +165,27 @@ export function ScheduleCard({ schedule, onUpdated }: ScheduleCardProps) {
         </div>
       </CardContent>
     </Card>
+
+    <ConfirmDialog
+      open={showCancelDialog}
+      onOpenChange={setShowCancelDialog}
+      onConfirm={handleCancel}
+      title="Cancel Schedule"
+      description="Are you sure you want to cancel this schedule? This action cannot be undone."
+      confirmText="Cancel Schedule"
+      variant="destructive"
+    />
+
+    <ConfirmDialog
+      open={showDeleteDialog}
+      onOpenChange={setShowDeleteDialog}
+      onConfirm={handleDelete}
+      title="Delete Schedule"
+      description="Are you sure you want to permanently delete this cancelled schedule? This action cannot be undone."
+      confirmText="Delete"
+      variant="destructive"
+    />
+    </>
   );
 }
 

@@ -262,6 +262,15 @@ export class ScheduleService {
     return this.scheduleRepository.save(schedule);
   }
 
+  async deleteSchedule(scheduleId: string, userId: string): Promise<void> {
+    const schedule = await this.findScheduleByIdAndUser(scheduleId, userId);
+    if (schedule.status !== ScheduleStatus.CANCELLED) {
+      throw new BadRequestException('Only cancelled schedules can be deleted');
+    }
+
+    await this.scheduleRepository.remove(schedule);
+  }
+
   async getDueSchedules(): Promise<{
     schedules: RecurringSchedule[];
     total: number;
