@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import {
   Transaction,
   TransactionStatus,
+  TransactionType,
 } from '../transaction/entities/transaction.entity';
 import { PaystackProvider } from '../payment/providers/paystack.provider';
 import { WalletService } from '../wallet/wallet.service';
@@ -45,6 +46,12 @@ export class WebhookService {
         break;
       case 'transfer.reversed':
         await this.handleTransferReversed(data);
+        break;
+      case 'charge.success':
+        await this.handleChargeSuccess(data);
+        break;
+      case 'charge.failed':
+        await this.handleChargeFailed(data);
         break;
       default:
         this.logger.log(`Unhandled Paystack event: ${event}`);
@@ -145,6 +152,73 @@ export class WebhookService {
     );
 
     this.logger.log(`Transaction ${transaction.id} reversed and refunded`);
+  }
+
+  private async handleChargeSuccess(data: Record<string, any>): Promise<void> {
+    const reference = data.reference as string;
+    const transaction = await this.findTransactionByReference(reference);
+
+    if (!transaction) {
+      this.logger.warn(`Transaction not found for reference: ${reference}`);
+      return;
+    }
+
+    if (transaction.type !== TransactionType.WALLET_FUNDING) {
+      this.logger.log(
+        `Transaction ${transaction.id} is not a wallet funding transaction`,
+      );
+      return;
+    }
+
+    if (transaction.isSuccessful()) {
+      this.logger.log(
+        `Transaction ${transaction.id} already marked as successful`,
+      );
+      return;
+    }
+
+    const amount = (data.amount as number) / 100;
+
+    await this.walletService.creditWallet(transaction.userId, amount);
+
+    transaction.status = TransactionStatus.SUCCESS;
+    transaction.completedAt = new Date();
+    transaction.providerResponse = data;
+    transaction.amount = amount;
+
+    await this.transactionRepository.save(transaction);
+    this.logger.log(
+      `Wallet funding transaction ${transaction.id} completed successfully`,
+    );
+  }
+
+  private async handleChargeFailed(data: Record<string, any>): Promise<void> {
+    const reference = data.reference as string;
+    const transaction = await this.findTransactionByReference(reference);
+
+    if (!transaction) {
+      this.logger.warn(`Transaction not found for reference: ${reference}`);
+      return;
+    }
+
+    if (transaction.type !== TransactionType.WALLET_FUNDING) {
+      return;
+    }
+
+    if (transaction.isFailed()) {
+      this.logger.log(`Transaction ${transaction.id} already marked as failed`);
+      return;
+    }
+
+    transaction.status = TransactionStatus.FAILED;
+    transaction.failureReason =
+      (data as { message?: string }).message || 'Payment failed';
+    transaction.providerResponse = data;
+
+    await this.transactionRepository.save(transaction);
+    this.logger.log(
+      `Wallet funding transaction ${transaction.id} marked as failed`,
+    );
   }
 
   private async findTransactionByReference(
