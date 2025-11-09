@@ -106,9 +106,13 @@ export function ScheduleCard({ schedule, onUpdated }: ScheduleCardProps) {
         <div className="space-y-2 text-sm">
           <div>
             <span className="text-muted-foreground">Next run:</span>{' '}
-            {format(new Date(schedule.nextRunDate), 'MMM d, yyyy HH:mm')}
+            {schedule.nextRunDate && !isNaN(new Date(schedule.nextRunDate).getTime()) ? (
+              format(new Date(schedule.nextRunDate), 'MMM d, yyyy HH:mm')
+            ) : (
+              <span className="text-muted-foreground">Not scheduled</span>
+            )}
           </div>
-          {schedule.lastRunDate && (
+          {schedule.lastRunDate && !isNaN(new Date(schedule.lastRunDate).getTime()) && (
             <div>
               <span className="text-muted-foreground">Last run:</span>{' '}
               {format(new Date(schedule.lastRunDate), 'MMM d, yyyy')}

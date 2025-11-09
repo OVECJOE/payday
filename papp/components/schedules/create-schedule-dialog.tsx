@@ -26,7 +26,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import type { Schedule } from '@/lib/types';
 import type { Recipient } from '@/lib/types';
 
 const scheduleSchema = z.object({
@@ -54,13 +53,11 @@ type ScheduleFormData = z.infer<typeof scheduleSchema>;
 interface CreateScheduleDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess: (schedule: Schedule) => void;
 }
 
 export function CreateScheduleDialog({
   open,
   onOpenChange,
-  onSuccess,
 }: CreateScheduleDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [recipients, setRecipients] = useState<Recipient[]>([]);
@@ -159,7 +156,10 @@ export function CreateScheduleDialog({
         );
         reset();
         setSelectedRecipients([]);
-        onSuccess({} as Schedule);
+        onOpenChange(false);
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       } else {
         toast.error('Failed to create schedules');
       }

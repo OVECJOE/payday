@@ -12,13 +12,8 @@ interface SchedulesListProps {
 }
 
 export function SchedulesList({ initialSchedules }: SchedulesListProps) {
-  const [schedules, setSchedules] = useState(initialSchedules);
+  const [schedules] = useState(initialSchedules);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const handleScheduleCreated = (schedule: Schedule) => {
-    setSchedules([schedule, ...schedules]);
-    setIsDialogOpen(false);
-  };
 
   const handleScheduleUpdated = () => {
     window.location.reload();
@@ -57,7 +52,6 @@ export function SchedulesList({ initialSchedules }: SchedulesListProps) {
       <CreateScheduleDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        onSuccess={handleScheduleCreated}
       />
     </>
   );
