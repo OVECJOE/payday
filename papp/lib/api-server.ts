@@ -33,11 +33,14 @@ async function refreshAccessTokenServer(): Promise<string | null> {
     })
 
     if (!response.ok) {
+      cookieStore.delete('accessToken')
+      cookieStore.delete('refreshToken')
       return null
     }
 
     const data = await response.json()
     const newAccessToken = data.accessToken
+    const newRefreshToken = data.refreshToken
 
     if (newAccessToken) {
       cookieStore.set('accessToken', newAccessToken, {
@@ -47,8 +50,8 @@ async function refreshAccessTokenServer(): Promise<string | null> {
         maxAge: 60 * 60 * 24 * 7,
         path: '/',
       })
-      if (data.refreshToken) {
-        cookieStore.set('refreshToken', data.refreshToken, {
+      if (newRefreshToken) {
+        cookieStore.set('refreshToken', newRefreshToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
@@ -60,6 +63,9 @@ async function refreshAccessTokenServer(): Promise<string | null> {
 
     return newAccessToken
   } catch {
+    const cookieStore = await cookies()
+    cookieStore.delete('accessToken')
+    cookieStore.delete('refreshToken')
     return null
   }
 }

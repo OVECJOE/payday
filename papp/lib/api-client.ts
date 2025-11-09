@@ -31,21 +31,35 @@ async function refreshAccessToken(): Promise<string | null> {
     })
 
     if (!response.ok) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+      }
       return null
     }
 
     const data = await response.json()
     const newAccessToken = data.accessToken
+    const newRefreshToken = data.refreshToken
 
     if (newAccessToken && typeof window !== 'undefined') {
       localStorage.setItem('accessToken', newAccessToken)
-      if (data.refreshToken) {
-        localStorage.setItem('refreshToken', data.refreshToken)
+      if (newRefreshToken) {
+        localStorage.setItem('refreshToken', newRefreshToken)
+      }
+      
+      const authStore = (await import('./stores/auth-store')).useAuthStore.getState()
+      if (authStore.accessToken) {
+        authStore.setAuth(authStore.user!, newAccessToken, newRefreshToken || localStorage.getItem('refreshToken') || '')
       }
     }
 
     return newAccessToken
   } catch {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+    }
     return null
   }
 }
@@ -75,10 +89,10 @@ async function fetchApi<T>(
     const newToken = await refreshAccessToken()
     
     if (newToken) {
-        headers = {
-            ...headers,
-            Authorization: `Bearer ${newToken}`
-        }
+      headers = {
+        ...headers,
+        Authorization: `Bearer ${newToken}`
+      }
       response = await fetch(`${API_URL}${endpoint}`, {
         ...options,
         headers,
@@ -88,6 +102,8 @@ async function fetchApi<T>(
       if (typeof window !== 'undefined') {
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
+        const authStore = (await import('./stores/auth-store')).useAuthStore.getState()
+        authStore.clearAuth()
         window.location.href = '/login'
       }
       throw new ApiError(401, 'Authentication required')
@@ -245,4 +261,3 @@ export const api = {
     get: (id: string) => fetchApi(`/transactions/${id}`),
   },
 }
-

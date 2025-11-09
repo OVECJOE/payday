@@ -3,6 +3,31 @@
 import { cookies } from 'next/headers'
 import { api } from '@/lib/api'
 
+export async function updateTokensAction(accessToken: string, refreshToken?: string) {
+  try {
+    const cookieStore = await cookies()
+    cookieStore.set('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+    })
+    if (refreshToken) {
+      cookieStore.set('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 30,
+        path: '/',
+      })
+    }
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: (error as Error).message }
+  }
+}
+
 export async function registerAction(formData: FormData) {
   try {
     const email = formData.get('email') as string
