@@ -12,7 +12,7 @@ export default async function DashboardLayout({
   const { user } = await requireAuth();
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen relative">
       <BackgroundIllustration />
       <div className="flex h-screen overflow-hidden relative z-10">
         <DashboardNav />
