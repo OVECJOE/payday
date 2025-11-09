@@ -30,7 +30,7 @@ export function DashboardOverview({ balance, stats, recentTransactions }: Dashbo
     <div className="space-y-6 md:space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back! Here's your overview.</p>
+        <p className="text-muted-foreground">Welcome back! Here&apos;s your overview.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

@@ -51,7 +51,7 @@ export function ForgotPasswordForm() {
         <CardHeader>
           <CardTitle>Check your email</CardTitle>
           <CardDescription>
-            We've sent a password reset link to your email address.
+            We&apos;ve sent a password reset link to your email address.
           </CardDescription>
         </CardHeader>
         <CardFooter>

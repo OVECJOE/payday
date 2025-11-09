@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation';
 import { requireAuth } from '@/lib/auth';
 import { getBalanceAction } from '@/app/actions/wallet';
 import { getScheduleStatsAction } from '@/app/actions/schedules';

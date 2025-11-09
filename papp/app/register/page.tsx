@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation';
 import { requireGuest } from '@/lib/auth';
 import { RegisterForm } from '@/components/auth/register-form';
 

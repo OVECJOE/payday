@@ -70,7 +70,6 @@ export function CreateScheduleDialog({
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
     reset,
   } = useForm<ScheduleFormData>({
     resolver: zodResolver(scheduleSchema),
