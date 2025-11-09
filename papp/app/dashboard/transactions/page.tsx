@@ -1,5 +1,7 @@
-import { api } from '@/lib/api'
+import { apiServer } from '@/lib/api-server'
 import { formatCurrency, formatDate } from '@/lib/utils'
+
+export const dynamic = 'force-dynamic'
 
 interface Transaction {
   id: string
@@ -15,7 +17,7 @@ interface Transaction {
 
 async function getTransactions() {
   try {
-    const result = await api.transactions.list(100, 0)
+    const result = await apiServer.transactions.list(100, 0)
     return result as { transactions: Transaction[]; total: number }
   } catch {
     return { transactions: [], total: 0 }

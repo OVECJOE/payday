@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { getRecipient } from '@/app/actions/recipients'
 import { getInitials, formatDate } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 interface Recipient {
   id: string
   status: string

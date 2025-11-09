@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button'
 import { getRecipients } from '@/app/actions/recipients'
 import { RecipientCard, Recipient } from './recipient-card'
 
+export const dynamic = 'force-dynamic'
+
 export default async function RecipientsPage() {
   const result = await getRecipients()
   const recipients = result.success ? (result.data as Recipient[]) : []

@@ -1,11 +1,12 @@
 'use server'
 
 import { api } from '@/lib/api'
+import { apiServer } from '@/lib/api-server'
 import { revalidatePath } from 'next/cache'
 
 export async function getSchedules(status?: string) {
   try {
-    const schedules = await api.schedules.list(status)
+    const schedules = await apiServer.schedules.list(status)
     return { success: true, data: schedules }
   } catch (error) {
     return { success: false, error: (error as Error).message }
@@ -14,7 +15,7 @@ export async function getSchedules(status?: string) {
 
 export async function getSchedule(id: string) {
   try {
-    const schedule = await api.schedules.get(id)
+    const schedule = await apiServer.schedules.get(id)
     return { success: true, data: schedule }
   } catch (error) {
     return { success: false, error: (error as Error).message }

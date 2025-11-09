@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import { getSchedule } from '@/app/actions/schedules'
 import { formatCurrency, formatDate } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 interface Schedule {
   id: string
   recipient: {

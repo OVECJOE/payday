@@ -1,5 +1,7 @@
-import { api } from '@/lib/api'
+import { apiServer } from '@/lib/api-server'
 import { formatCurrency } from '@/lib/utils'
+
+export const dynamic = 'force-dynamic'
 
 interface Wallet {
   total: number
@@ -16,8 +18,8 @@ interface Balance {
 async function getWalletData() {
   try {
     const [wallet, balance] = await Promise.all([
-      api.wallet.get(),
-      api.wallet.balance(),
+      apiServer.wallet.get(),
+      apiServer.wallet.balance(),
     ])
     return { wallet: wallet as Wallet, balance: balance as Balance }
   } catch {

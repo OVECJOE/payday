@@ -1,11 +1,12 @@
 'use server'
 
 import { api } from '@/lib/api'
+import { apiServer } from '@/lib/api-server'
 import { revalidatePath } from 'next/cache'
 
 export async function getRecipients() {
   try {
-    const recipients = await api.recipients.list()
+    const recipients = await apiServer.recipients.list()
     return { success: true, data: recipients }
   } catch (error) {
     return { success: false, error: (error as Error).message }
@@ -14,7 +15,7 @@ export async function getRecipients() {
 
 export async function getRecipient(id: string) {
   try {
-    const recipient = await api.recipients.get(id)
+    const recipient = await apiServer.recipients.get(id)
     return { success: true, data: recipient }
   } catch (error) {
     return { success: false, error: (error as Error).message }
