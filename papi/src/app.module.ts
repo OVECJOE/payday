@@ -15,6 +15,7 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { QueueModule } from './modules/queue/queue.module';
+import { HealthController } from './app.controller';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { QueueModule } from './modules/queue/queue.module';
     WebhookModule,
     QueueModule,
   ],
+  controllers: [HealthController],
   providers: [
     {
       provide: APP_GUARD,
