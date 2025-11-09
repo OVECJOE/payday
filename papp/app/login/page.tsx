@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,7 +19,6 @@ interface LoginResult {
 }
 
 export default function LoginPage() {
-  const router = useRouter()
   const setAuth = useAuthStore((state) => state.setAuth)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -35,7 +33,7 @@ export default function LoginPage() {
 
     if (result.success && result.data) {
       setAuth(result.data.user, result.data.accessToken, result.data.refreshToken)
-      router.push('/dashboard')
+      window.location.href = '/dashboard'
     } else {
       setError(result.error || 'Login failed')
       setLoading(false)

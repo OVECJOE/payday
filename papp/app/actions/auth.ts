@@ -1,5 +1,6 @@
 'use server'
 
+import { cookies } from 'next/headers'
 import { api } from '@/lib/api'
 
 export async function registerAction(formData: FormData) {
@@ -19,6 +20,30 @@ export async function registerAction(formData: FormData) {
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     })
 
+    if (result && typeof result === 'object' && 'accessToken' in result) {
+      const cookieStore = await cookies()
+      const accessToken = (result as { accessToken: string }).accessToken
+      const refreshToken = (result as { refreshToken?: string }).refreshToken
+
+      cookieStore.set('accessToken', accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      })
+
+      if (refreshToken) {
+        cookieStore.set('refreshToken', refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 30,
+          path: '/',
+        })
+      }
+    }
+
     return { success: true, data: result }
   } catch (error) {
     return { success: false, error: (error as Error).message }
@@ -32,6 +57,30 @@ export async function loginAction(formData: FormData) {
 
     const result = await api.auth.login(email, password)
 
+    if (result && typeof result === 'object' && 'accessToken' in result) {
+      const cookieStore = await cookies()
+      const accessToken = (result as { accessToken: string }).accessToken
+      const refreshToken = (result as { refreshToken?: string }).refreshToken
+
+      cookieStore.set('accessToken', accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      })
+
+      if (refreshToken) {
+        cookieStore.set('refreshToken', refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 30,
+          path: '/',
+        })
+      }
+    }
+
     return { success: true, data: result }
   } catch (error) {
     return { success: false, error: (error as Error).message }
@@ -41,6 +90,9 @@ export async function loginAction(formData: FormData) {
 export async function logoutAction() {
   try {
     await api.auth.logout()
+    const cookieStore = await cookies()
+    cookieStore.delete('accessToken')
+    cookieStore.delete('refreshToken')
     return { success: true }
   } catch (error) {
     return { success: false, error: (error as Error).message }
