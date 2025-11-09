@@ -3,6 +3,8 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -39,6 +41,7 @@ export class WalletService {
     @InjectRepository(Transaction)
     private transactionRepository: Repository<Transaction>,
     private dataSource: DataSource,
+    @Inject(forwardRef(() => PaystackProvider))
     private paystackProvider: PaystackProvider,
     private encryptionService: EncryptionService,
   ) {}
