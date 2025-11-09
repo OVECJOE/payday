@@ -170,48 +170,6 @@ export class PaystackProvider implements IPaymentProvider {
     }
   }
 
-  async initializePayment(params: {
-    amount: number;
-    email: string;
-    reference: string;
-    callbackUrl?: string;
-    metadata?: Record<string, any>;
-  }): Promise<{
-    authorizationUrl: string;
-    accessCode: string;
-    reference: string;
-  }> {
-    try {
-      const payload = {
-        amount: params.amount * 100,
-        email: params.email,
-        reference: params.reference,
-        callback_url: params.callbackUrl,
-        metadata: params.metadata || {},
-        currency: 'NGN',
-      };
-
-      const response = await this.makeRequest(
-        '/transaction/initialize',
-        'POST',
-        payload,
-      );
-
-      if (!response.status || !response.data) {
-        throw new Error(response.message || 'Failed to initialize payment');
-      }
-
-      return {
-        authorizationUrl: response.data.authorization_url as string,
-        accessCode: response.data.access_code as string,
-        reference: response.data.reference as string,
-      };
-    } catch (error) {
-      this.logger.error('Paystack payment initialization failed', error);
-      throw error;
-    }
-  }
-
   verifyWebhookSignature(payload: string, signature: string): boolean {
     return this.encryptionService.validateWebhookSignature(
       payload,

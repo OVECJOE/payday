@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bullmq';
 import { PaymentOrchestratorService } from './payment-orchestrator.service';
@@ -17,7 +17,7 @@ import { TimeService } from '@common/services/time.service';
   imports: [
     TypeOrmModule.forFeature([Transaction, RecurringSchedule]),
     BullModule.registerQueue({ name: QueueName.PAYMENT }),
-    forwardRef(() => WalletModule),
+    WalletModule,
   ],
   providers: [
     PaymentOrchestratorService,

@@ -3,21 +3,10 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
-  Inject,
-  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Wallet } from './entities/wallet.entity';
-import { User } from '../user/entities/user.entity';
-import {
-  Transaction,
-  TransactionStatus,
-  TransactionType,
-  PaymentProvider,
-} from '../transaction/entities/transaction.entity';
-import { PaystackProvider } from '../payment/providers/paystack.provider';
-import { EncryptionService } from '@common/services/encryption.service';
 
 export interface WalletLockResult {
   success: boolean;
@@ -36,14 +25,7 @@ export class WalletService {
   constructor(
     @InjectRepository(Wallet)
     private walletRepository: Repository<Wallet>,
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-    @InjectRepository(Transaction)
-    private transactionRepository: Repository<Transaction>,
     private dataSource: DataSource,
-    @Inject(forwardRef(() => PaystackProvider))
-    private paystackProvider: PaystackProvider,
-    private encryptionService: EncryptionService,
   ) {}
 
   async createWallet(userId: string): Promise<Wallet> {
@@ -232,75 +214,5 @@ export class WalletService {
       wallet.lockedBalance = Number(wallet.lockedBalance) - amount;
       return manager.save(wallet);
     });
-  }
-
-  async getUserEmail(userId: string): Promise<string> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      select: ['email'],
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    return user.email;
-  }
-
-  async initializeWalletFunding(
-    userId: string,
-    amount: number,
-  ): Promise<{ authorizationUrl: string; reference: string }> {
-    const wallet = await this.getWalletByUserId(userId);
-    if (!wallet) {
-      throw new NotFoundException('Wallet not found');
-    }
-
-    const userEmail = await this.getUserEmail(userId);
-    const idempotencyKey = this.encryptionService.generateIdempotencyKey();
-
-    const transaction = this.transactionRepository.create({
-      idempotencyKey,
-      userId,
-      scheduleId: idempotencyKey,
-      recipientId: undefined,
-      amount,
-      fee: 0,
-      type: TransactionType.WALLET_FUNDING,
-      status: TransactionStatus.PENDING,
-      provider: PaymentProvider.PAYSTACK,
-      description: 'Wallet funding',
-      metadata: {
-        source: 'user',
-        walletId: wallet.id,
-      },
-    });
-
-    const savedTransaction = await this.transactionRepository.save(transaction);
-
-    const callbackUrl =
-      process.env.PAYSTACK_CALLBACK_URL ||
-      `${process.env.FRONTEND_URL || 'http://localhost:3001'}/dashboard/wallet?funding=success`;
-
-    const paymentResult = await this.paystackProvider.initializePayment({
-      amount,
-      email: userEmail,
-      reference: savedTransaction.id,
-      callbackUrl,
-      metadata: {
-        transactionId: savedTransaction.id,
-        userId,
-        walletId: wallet.id,
-        type: 'wallet_funding',
-      },
-    });
-
-    savedTransaction.providerReference = paymentResult.reference;
-    await this.transactionRepository.save(savedTransaction);
-
-    return {
-      authorizationUrl: paymentResult.authorizationUrl,
-      reference: savedTransaction.id,
-    };
   }
 }
