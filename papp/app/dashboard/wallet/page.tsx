@@ -1,5 +1,6 @@
 import { apiServer } from '@/lib/api-server'
 import { formatCurrency } from '@/lib/utils'
+import { FundWallet } from './components/fund-wallet'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,7 +22,6 @@ async function getWalletData() {
       apiServer.wallet.get(),
       apiServer.wallet.balance(),
     ])
-    console.log(wallet, balance)
     return { wallet: wallet as Wallet, balance: balance as Balance }
   } catch {
     return { wallet: null, balance: null }
@@ -44,8 +44,10 @@ export default async function WalletPage() {
   }
 
   const utilizationRate = balance.total > 0 
-    ? ((balance.locked / balance.total) * 100).toFixed(1)
+    ? Math.min(100, ((balance.locked / balance.total) * 100)).toFixed(1)
     : '0'
+  
+  const utilizationPercent = parseFloat(utilizationRate)
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8">
@@ -103,14 +105,18 @@ export default async function WalletPage() {
             />
           </div>
           <p className="text-sm text-muted-foreground">
-            {parseFloat(utilizationRate) > 80
+            {utilizationPercent > 80
               ? 'Most of your balance is locked for pending payments. Consider adding more funds.'
-              : parseFloat(utilizationRate) > 50
+              : utilizationPercent > 50
               ? 'A significant portion of your balance is locked for pending payments.'
-              : 'You have sufficient available balance for new payments.'}
+              : utilizationPercent > 0
+              ? 'You have sufficient available balance for new payments.'
+              : 'No funds are currently locked.'}
           </p>
         </div>
       </div>
+
+      <FundWallet />
 
       <div className="border-l-4 border-blue-500 bg-blue-50 p-4 sm:p-6 rounded">
         <h3 className="font-semibold text-blue-900 mb-2 text-sm sm:text-base">How it works</h3>

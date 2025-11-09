@@ -13,25 +13,96 @@ export class ApiError extends Error {
   }
 }
 
+async function refreshAccessTokenServer(): Promise<string | null> {
+  try {
+    const cookieStore = await cookies()
+    const refreshToken = cookieStore.get('refreshToken')?.value
+
+    if (!refreshToken) {
+      return null
+    }
+
+    const response = await fetch(`${API_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      cache: 'no-store',
+      body: JSON.stringify({ refreshToken }),
+    })
+
+    if (!response.ok) {
+      return null
+    }
+
+    const data = await response.json()
+    const newAccessToken = data.accessToken
+
+    if (newAccessToken) {
+      cookieStore.set('accessToken', newAccessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      })
+      if (data.refreshToken) {
+        cookieStore.set('refreshToken', data.refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 30,
+          path: '/',
+        })
+      }
+    }
+
+    return newAccessToken
+  } catch {
+    return null
+  }
+}
+
 async function fetchApiServer<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  retry = true
 ): Promise<T> {
   const cookieStore = await cookies()
   const token = cookieStore.get('accessToken')?.value
 
-  const headers: HeadersInit = {
+  let headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...options.headers,
     ...(token && !endpoint.includes('auth') ? { Authorization: `Bearer ${token}` } : {}),
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  let response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers,
     credentials: 'include',
     cache: 'no-store',
   })
+
+  if (response.status === 401 && retry && !endpoint.includes('auth')) {
+    const newToken = await refreshAccessTokenServer()
+    
+    if (newToken) {
+      headers = {
+        ...headers,
+        Authorization: `Bearer ${newToken}`
+      }
+      response = await fetch(`${API_URL}${endpoint}`, {
+        ...options,
+        headers,
+        credentials: 'include',
+        cache: 'no-store',
+      })
+    } else {
+      throw new ApiError(401, 'Authentication required')
+    }
+  }
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: 'Request failed' }))

@@ -1,5 +1,6 @@
 'use server'
 
+import { cookies } from 'next/headers'
 import { api } from '@/lib/api'
 import { apiServer } from '@/lib/api-server'
 import { revalidatePath } from 'next/cache'
@@ -33,7 +34,26 @@ export async function getBanks() {
 
 export async function validateBankAccount(accountNumber: string, bankCode: string) {
   try {
-    const result = await api.recipients.validateAccount(accountNumber, bankCode)
+    const cookieStore = await cookies()
+    const token = cookieStore.get('accessToken')?.value
+    
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/recipients/validate-account`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+      cache: 'no-store',
+      body: JSON.stringify({ accountNumber, bankCode }),
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Validation failed' }))
+      return { success: false, error: error.message || 'Validation failed' }
+    }
+
+    const result = await response.json()
     return { success: true, data: result }
   } catch (error) {
     return { success: false, error: (error as Error).message }
@@ -42,15 +62,33 @@ export async function validateBankAccount(accountNumber: string, bankCode: strin
 
 export async function createRecipient(formData: FormData) {
   try {
-    const recipient = await api.recipients.create({
-      name: formData.get('name') as string,
-      accountNumber: formData.get('accountNumber') as string,
-      bankCode: formData.get('bankCode') as string,
-      email: formData.get('email') as string || undefined,
-      phone: formData.get('phone') as string || undefined,
-      notes: formData.get('notes') as string || undefined,
-    })
+    const cookieStore = await cookies()
+    const token = cookieStore.get('accessToken')?.value
     
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/recipients`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+      cache: 'no-store',
+      body: JSON.stringify({
+        name: formData.get('name') as string,
+        accountNumber: formData.get('accountNumber') as string,
+        bankCode: formData.get('bankCode') as string,
+        email: formData.get('email') as string || undefined,
+        phone: formData.get('phone') as string || undefined,
+        notes: formData.get('notes') as string || undefined,
+      }),
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Failed to create recipient' }))
+      return { success: false, error: error.message || 'Failed to create recipient' }
+    }
+
+    const recipient = await response.json()
     revalidatePath('/dashboard/recipients')
     return { success: true, data: recipient }
   } catch (error) {

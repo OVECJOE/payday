@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,7 @@ export function RecipientForm() {
   const [loading, setLoading] = useState(false)
   const [validating, setValidating] = useState(false)
   const [error, setError] = useState('')
+  const [validationError, setValidationError] = useState('')
   const [validatedName, setValidatedName] = useState('')
   const [formData, setFormData] = useState({
     accountNumber: '',
@@ -29,11 +30,33 @@ export function RecipientForm() {
     notes: '',
   })
 
+  useEffect(() => {
+    if (formData.accountNumber.length === 10 && formData.bankCode) {
+      const timeoutId = setTimeout(() => {
+        handleValidate()
+      }, 500)
+      return () => clearTimeout(timeoutId)
+    } else {
+      setValidatedName('')
+      setValidationError('')
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.accountNumber, formData.bankCode])
+
   async function handleValidate() {
-    if (!formData.accountNumber || !formData.bankCode) return
+    if (!formData.accountNumber || !formData.bankCode) {
+      setValidationError('Please enter both account number and bank')
+      return
+    }
+
+    if (formData.accountNumber.length !== 10) {
+      setValidationError('Account number must be 10 digits')
+      return
+    }
 
     setValidating(true)
     setError('')
+    setValidationError('')
     setValidatedName('')
 
     const result = await validateBankAccount(formData.accountNumber, formData.bankCode)
@@ -43,8 +66,10 @@ export function RecipientForm() {
       const accountName = (result.data as ValidateBankAccountResult).accountName || ''
       setValidatedName(accountName)
       setFormData((prev) => ({ ...prev, name: accountName }))
+      setValidationError('')
     } else {
-      setError('Could not validate account. Please check the details.')
+      setValidationError('Could not validate account. Please check the account number and bank.')
+      setValidatedName('')
     }
   }
 
@@ -52,6 +77,19 @@ export function RecipientForm() {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setValidationError('')
+
+    if (!formData.accountNumber || !formData.bankCode) {
+      setError('Please fill in all required fields')
+      setLoading(false)
+      return
+    }
+
+    if (!validatedName) {
+      setError('Please validate the account number first')
+      setLoading(false)
+      return
+    }
 
     const form = new FormData(e.currentTarget)
     const result = await createRecipient(form)
@@ -76,6 +114,7 @@ export function RecipientForm() {
           onChange={(value) => {
             setFormData({ ...formData, bankCode: value })
             setValidatedName('')
+            setValidationError('')
           }}
           disabled={loading}
           required
@@ -83,34 +122,37 @@ export function RecipientForm() {
 
         <div className="space-y-2">
           <Label htmlFor="accountNumber">Account number</Label>
-          <div className="flex gap-2">
-            <Input
-              id="accountNumber"
-              name="accountNumber"
-              required
-              disabled={loading}
-              maxLength={10}
-              value={formData.accountNumber}
-              onChange={(e) => {
-                setFormData({ ...formData, accountNumber: e.target.value })
-                setValidatedName('')
-              }}
-              placeholder="0123456789"
-              className="flex-1"
-            />
-            <Button
-              type="button"
-              onClick={handleValidate}
-              disabled={!formData.accountNumber || !formData.bankCode || validating || loading}
-              variant="outline"
-              className="whitespace-nowrap"
-            >
-              {validating ? 'Validating...' : 'Validate'}
-            </Button>
+          <Input
+            id="accountNumber"
+            name="accountNumber"
+            required
+            disabled={loading}
+            maxLength={10}
+            minLength={10}
+            value={formData.accountNumber}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, '')
+              setFormData({ ...formData, accountNumber: value })
+              setValidatedName('')
+              setValidationError('')
+            }}
+            placeholder="0123456789"
+            className="flex-1"
+          />
+          <div className="flex items-center gap-2">
+            {validating && (
+              <span className="text-xs text-muted-foreground">Validating account...</span>
+            )}
+            {validatedName && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-green-600 font-medium">Account verified:</span>
+                <span className="font-semibold text-green-700">{validatedName}</span>
+              </div>
+            )}
+            {validationError && (
+              <span className="text-xs text-destructive">{validationError}</span>
+            )}
           </div>
-          {validatedName && (
-            <p className="text-sm text-green-600 font-medium">{validatedName}</p>
-          )}
         </div>
 
         <div className="space-y-2">
@@ -119,11 +161,17 @@ export function RecipientForm() {
             id="name"
             name="name"
             required
-            disabled={loading}
+            disabled={loading || !!validatedName}
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder="Enter recipient name"
+            className={validatedName ? 'bg-muted' : ''}
           />
+          {validatedName && (
+            <p className="text-xs text-muted-foreground">
+              Name auto-filled from account validation. You can edit if needed.
+            </p>
+          )}
         </div>
       </div>
 
@@ -178,7 +226,11 @@ export function RecipientForm() {
       )}
 
       <div className="flex flex-col sm:flex-row gap-3">
-        <Button type="submit" disabled={loading || !validatedName} className="flex-1 sm:flex-none">
+        <Button 
+          type="submit" 
+          disabled={loading || !validatedName || validating} 
+          className="flex-1 sm:flex-none"
+        >
           {loading ? 'Adding...' : 'Add recipient'}
         </Button>
         <Link href="/dashboard/recipients" className="flex-1 sm:flex-none">
