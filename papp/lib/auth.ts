@@ -78,11 +78,16 @@ export async function clearAuthTokens(): Promise<void> {
   cookieStore.delete(USER_KEY);
 }
 
-export async function requireAuth(): Promise<{ token: string; user: User }> {
+export async function requireAuth(returnTo?: string): Promise<{ token: string; user: User }> {
   const token = await getAccessToken();
   const user = await getUser();
+  const refreshToken = await getRefreshToken();
 
   if (!token || !user) {
+    if (refreshToken) {
+      const redirectPath = returnTo || '/dashboard';
+      redirect(`/refresh-token?returnTo=${encodeURIComponent(redirectPath)}`);
+    }
     redirect('/login');
   }
 

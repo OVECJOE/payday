@@ -1,7 +1,7 @@
 'use server';
 
 import { api } from '@/lib/api';
-import { setAuthTokens, clearAuthTokens, requireAuth, type User } from '@/lib/auth';
+import { setAuthTokens, clearAuthTokens, requireAuth, getRefreshToken, getUser, type User } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 
@@ -116,6 +116,36 @@ export async function resetPasswordAction(formData: FormData) {
       return { error: error.message };
     }
     return { error: 'Password reset failed' };
+  }
+}
+
+export async function refreshTokenWithPasswordAction(formData: FormData) {
+  const password = formData.get('password') as string;
+  const refreshToken = await getRefreshToken();
+  const user = await getUser();
+
+  if (!refreshToken || !user) {
+    return { error: 'No refresh token available. Please log in again.' };
+  }
+
+  try {
+    const response = await api.auth.refreshWithPassword({
+      refreshToken,
+      password,
+    });
+
+    await setAuthTokens(
+      response.accessToken,
+      response.refreshToken,
+      response.user as User,
+    );
+
+    return { success: true };
+  } catch (error) {
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return { error: 'Token refresh failed' };
   }
 }
 

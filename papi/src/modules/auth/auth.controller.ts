@@ -7,6 +7,7 @@ import {
   Ip,
   UseGuards,
 } from '@nestjs/common';
+import { IsString } from 'class-validator';
 import {
   AuthService,
   type RegisterDto,
@@ -18,7 +19,16 @@ import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 class RefreshTokenDto {
+  @IsString()
   refreshToken: string;
+}
+
+class RefreshTokenWithPasswordDto {
+  @IsString()
+  refreshToken: string;
+
+  @IsString()
+  password: string;
 }
 
 class ChangePasswordDto {
@@ -61,6 +71,18 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refreshToken(@Body() dto: RefreshTokenDto): Promise<AuthResponse> {
     return this.authService.refreshToken(dto.refreshToken);
+  }
+
+  @Public()
+  @Post('refresh-with-password')
+  @HttpCode(HttpStatus.OK)
+  async refreshTokenWithPassword(
+    @Body() dto: RefreshTokenWithPasswordDto,
+  ): Promise<AuthResponse> {
+    return this.authService.refreshTokenWithPassword(
+      dto.refreshToken,
+      dto.password,
+    );
   }
 
   @UseGuards(JwtAuthGuard)

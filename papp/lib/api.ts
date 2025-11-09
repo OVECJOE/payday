@@ -63,10 +63,22 @@ export async function fetchWithAuth<T>(
     headers.Authorization = `Bearer ${token}`;
   }
 
-  return fetchApi<T>(endpoint, {
-    ...options,
-    headers,
-  });
+  try {
+    return await fetchApi<T>(endpoint, {
+      ...options,
+      headers,
+    });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) {
+      if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname + window.location.search;
+        const returnTo = encodeURIComponent(currentPath);
+        window.location.href = `/refresh-token?returnTo=${returnTo}`;
+      }
+      throw error;
+    }
+    throw error;
+  }
 }
 
 export const api = {
@@ -93,6 +105,12 @@ export const api = {
       fetchApi<{ accessToken: string; refreshToken: string; user: unknown }>('/auth/refresh', {
         method: 'POST',
         body: JSON.stringify({ refreshToken }),
+      }),
+
+    refreshWithPassword: (data: { refreshToken: string; password: string }) =>
+      fetchApi<{ accessToken: string; refreshToken: string; user: unknown }>('/auth/refresh-with-password', {
+        method: 'POST',
+        body: JSON.stringify(data),
       }),
 
     logout: (token: string) =>
