@@ -66,6 +66,7 @@ export const apiServer = {
   recipients: {
     list: () => fetchApiServer('/recipients'),
     get: (id: string) => fetchApiServer(`/recipients/${id}`),
+    getBanks: () => fetchApiServer('/recipients/banks/list'),
   },
 }
 

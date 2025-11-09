@@ -24,7 +24,7 @@ export async function getRecipient(id: string) {
 
 export async function getBanks() {
   try {
-    const banks = await api.recipients.getBanks()
+    const banks = await apiServer.recipients.getBanks()
     return { success: true, data: banks }
   } catch (error) {
     return { success: false, error: (error as Error).message }

@@ -32,9 +32,9 @@ export default async function WalletPage() {
 
   if (!balance || !wallet) {
     return (
-      <div className="p-8">
-        <div className="border-2 border-dashed rounded-lg p-12 text-center">
-          <p className="text-muted-foreground">Unable to load wallet data</p>
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="border-2 border-dashed rounded-lg p-6 sm:p-8 lg:p-12 text-center">
+          <p className="text-sm sm:text-base text-muted-foreground">Unable to load wallet data</p>
         </div>
       </div>
     )
@@ -45,48 +45,48 @@ export default async function WalletPage() {
     : '0'
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Wallet</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Wallet</h1>
+        <p className="text-sm sm:text-base text-muted-foreground mt-1">
           Manage your payment balance
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="border rounded-lg p-8 space-y-4">
-          <div className="text-sm text-muted-foreground">Total Balance</div>
-          <div className="text-4xl font-bold">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="border rounded-lg p-4 sm:p-6 lg:p-8 space-y-3 sm:space-y-4">
+          <div className="text-xs sm:text-sm text-muted-foreground">Total Balance</div>
+          <div className="text-2xl sm:text-3xl lg:text-4xl font-bold">
             {formatCurrency(balance.total)}
           </div>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs sm:text-sm text-muted-foreground">
             Your complete wallet balance
           </div>
         </div>
 
-        <div className="border rounded-lg p-8 space-y-4 bg-green-50 border-green-200">
-          <div className="text-sm text-green-800">Available Balance</div>
-          <div className="text-4xl font-bold text-green-900">
+        <div className="border rounded-lg p-4 sm:p-6 lg:p-8 space-y-3 sm:space-y-4 bg-green-50 border-green-200">
+          <div className="text-xs sm:text-sm text-green-800">Available Balance</div>
+          <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-900">
             {formatCurrency(balance.available)}
           </div>
-          <div className="text-sm text-green-700">
+          <div className="text-xs sm:text-sm text-green-700">
             Ready for new payments
           </div>
         </div>
 
-        <div className="border rounded-lg p-8 space-y-4 bg-orange-50 border-orange-200">
-          <div className="text-sm text-orange-800">Locked Balance</div>
-          <div className="text-4xl font-bold text-orange-900">
+        <div className="border rounded-lg p-4 sm:p-6 lg:p-8 space-y-3 sm:space-y-4 bg-orange-50 border-orange-200">
+          <div className="text-xs sm:text-sm text-orange-800">Locked Balance</div>
+          <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-orange-900">
             {formatCurrency(balance.locked)}
           </div>
-          <div className="text-sm text-orange-700">
+          <div className="text-xs sm:text-sm text-orange-700">
             Reserved for pending payments
           </div>
         </div>
       </div>
 
-      <div className="border rounded-lg p-8 space-y-6">
-        <h2 className="text-xl font-semibold">Balance utilization</h2>
+      <div className="border rounded-lg p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+        <h2 className="text-lg sm:text-xl font-semibold">Balance utilization</h2>
         
         <div className="space-y-3">
           <div className="flex justify-between text-sm">
@@ -109,42 +109,13 @@ export default async function WalletPage() {
         </div>
       </div>
 
-      <div className="border rounded-lg p-8 space-y-4">
-        <h2 className="text-xl font-semibold">Fund your wallet</h2>
-        <p className="text-muted-foreground">
-          To add money to your wallet, transfer funds to your Payday account using any of these methods:
-        </p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-          <div className="border rounded-lg p-4 space-y-2">
-            <div className="font-medium">Bank transfer</div>
-            <div className="text-sm text-muted-foreground">
-              Transfer to your dedicated Payday account number
-            </div>
-            <div className="text-sm font-mono bg-muted px-3 py-2 rounded mt-2">
-              Coming soon
-            </div>
-          </div>
-
-          <div className="border rounded-lg p-4 space-y-2">
-            <div className="font-medium">Card payment</div>
-            <div className="text-sm text-muted-foreground">
-              Fund instantly with your debit or credit card
-            </div>
-            <div className="text-sm font-mono bg-muted px-3 py-2 rounded mt-2">
-              Coming soon
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="border-l-4 border-blue-500 bg-blue-50 p-6 rounded">
-        <h3 className="font-semibold text-blue-900 mb-2">How it works</h3>
-        <ul className="space-y-2 text-sm text-blue-800">
-          <li>• When you create a schedule, funds are locked from your available balance</li>
-          <li>• Locked funds ensure your scheduled payments will go through</li>
-          <li>• After successful payment, locked funds are deducted from your total balance</li>
-          <li>• If a payment fails, the locked funds are released back to your available balance</li>
+      <div className="border-l-4 border-blue-500 bg-blue-50 p-4 sm:p-6 rounded">
+        <h3 className="font-semibold text-blue-900 mb-2 text-sm sm:text-base">How it works</h3>
+        <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-blue-800">
+          <li>When you create a schedule, funds are locked from your available balance</li>
+          <li>Locked funds ensure your scheduled payments will go through</li>
+          <li>After successful payment, locked funds are deducted from your total balance</li>
+          <li>If a payment fails, the locked funds are released back to your available balance</li>
         </ul>
       </div>
     </div>

@@ -6,6 +6,13 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { createSchedule } from '@/app/actions/schedules'
 import { getRecipients } from '@/app/actions/recipients'
 import { formatCurrency } from '@/lib/utils'
@@ -92,14 +99,14 @@ export default function NewSchedulePage() {
 
   if (recipients.length === 0) {
     return (
-      <div className="p-8 max-w-2xl">
-        <div className="border-2 border-dashed rounded-lg p-12 text-center space-y-4">
-          <h3 className="text-lg font-semibold">No recipients yet</h3>
-          <p className="text-muted-foreground max-w-md mx-auto">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
+        <div className="border-2 border-dashed rounded-lg p-6 sm:p-8 lg:p-12 text-center space-y-4">
+          <h3 className="text-base sm:text-lg font-semibold">No recipients yet</h3>
+          <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
             You need to add at least one recipient before creating a schedule.
           </p>
-          <Link href="/dashboard/recipients/new">
-            <Button>Add recipient first</Button>
+          <Link href="/dashboard/recipients/new" className="inline-block w-full sm:w-auto">
+            <Button className="w-full sm:w-auto">Add recipient first</Button>
           </Link>
         </div>
       </div>
@@ -107,38 +114,40 @@ export default function NewSchedulePage() {
   }
 
   return (
-    <div className="p-8 max-w-2xl">
-      <div className="space-y-2 mb-8">
-        <Link href="/dashboard/schedules" className="text-sm text-muted-foreground hover:text-foreground">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
+      <div className="space-y-2 mb-6 sm:mb-8">
+        <Link href="/dashboard/schedules" className="text-sm text-muted-foreground hover:text-foreground inline-block">
           ← Back to schedules
         </Link>
-        <h1 className="text-3xl font-bold tracking-tight">Create schedule</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Create schedule</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Set up a recurring payment schedule
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-4 p-6 border rounded-lg">
-          <h3 className="font-semibold">Payment details</h3>
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+        <div className="space-y-4 p-4 sm:p-6 border rounded-lg">
+          <h3 className="font-semibold text-base sm:text-lg">Payment details</h3>
 
           <div className="space-y-2">
             <Label htmlFor="recipientId">Recipient</Label>
-            <select
-              id="recipientId"
-              required
-              disabled={loading}
+            <Select
               value={formData.recipientId}
-              onChange={(e) => setFormData({ ...formData, recipientId: e.target.value })}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              onValueChange={(value) => setFormData({ ...formData, recipientId: value })}
+              disabled={loading}
+              required
             >
-              <option value="">Select a recipient</option>
-              {recipients.map((recipient) => (
-                <option key={recipient.id} value={recipient.id}>
-                  {recipient.name} ({recipient.bankName})
-                </option>
-              ))}
-            </select>
+              <SelectTrigger id="recipientId" className="w-full">
+                <SelectValue placeholder="Select a recipient" />
+              </SelectTrigger>
+              <SelectContent>
+                {recipients.map((recipient) => (
+                  <SelectItem key={recipient.id} value={recipient.id}>
+                    {recipient.name} ({recipient.bankName})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
@@ -173,45 +182,51 @@ export default function NewSchedulePage() {
           </div>
         </div>
 
-        <div className="space-y-4 p-6 border rounded-lg">
-          <h3 className="font-semibold">Schedule</h3>
+        <div className="space-y-4 p-4 sm:p-6 border rounded-lg">
+          <h3 className="font-semibold text-base sm:text-lg">Schedule</h3>
 
           <div className="space-y-2">
             <Label htmlFor="frequency">Frequency</Label>
-            <select
-              id="frequency"
-              required
-              disabled={loading}
+            <Select
               value={frequency}
-              onChange={(e) => setFrequency(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              onValueChange={setFrequency}
+              disabled={loading}
+              required
             >
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="custom">Custom interval</option>
-            </select>
+              <SelectTrigger id="frequency" className="w-full">
+                <SelectValue placeholder="Select frequency" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="daily">Daily</SelectItem>
+                <SelectItem value="weekly">Weekly</SelectItem>
+                <SelectItem value="monthly">Monthly</SelectItem>
+                <SelectItem value="custom">Custom interval</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {frequency === 'weekly' && (
             <div className="space-y-2">
               <Label htmlFor="dayOfWeek">Day of week</Label>
-              <select
-                id="dayOfWeek"
-                required
-                disabled={loading}
+              <Select
                 value={formData.dayOfWeek}
-                onChange={(e) => setFormData({ ...formData, dayOfWeek: e.target.value })}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                onValueChange={(value) => setFormData({ ...formData, dayOfWeek: value })}
+                disabled={loading}
+                required
               >
-                <option value="1">Monday</option>
-                <option value="2">Tuesday</option>
-                <option value="3">Wednesday</option>
-                <option value="4">Thursday</option>
-                <option value="5">Friday</option>
-                <option value="6">Saturday</option>
-                <option value="0">Sunday</option>
-              </select>
+                <SelectTrigger id="dayOfWeek" className="w-full">
+                  <SelectValue placeholder="Select day" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Monday</SelectItem>
+                  <SelectItem value="2">Tuesday</SelectItem>
+                  <SelectItem value="3">Wednesday</SelectItem>
+                  <SelectItem value="4">Thursday</SelectItem>
+                  <SelectItem value="5">Friday</SelectItem>
+                  <SelectItem value="6">Saturday</SelectItem>
+                  <SelectItem value="0">Sunday</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           )}
 
@@ -295,12 +310,12 @@ export default function NewSchedulePage() {
           </div>
         )}
 
-        <div className="flex gap-3">
-          <Button type="submit" disabled={loading}>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button type="submit" disabled={loading} className="flex-1 sm:flex-none">
             {loading ? 'Creating...' : 'Create schedule'}
           </Button>
-          <Link href="/dashboard/schedules">
-            <Button type="button" variant="outline" disabled={loading}>
+          <Link href="/dashboard/schedules" className="flex-1 sm:flex-none">
+            <Button type="button" variant="outline" disabled={loading} className="w-full">
               Cancel
             </Button>
           </Link>

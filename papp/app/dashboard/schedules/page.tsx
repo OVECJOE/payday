@@ -21,16 +21,16 @@ export default async function SchedulesPage({
   ]
 
   return (
-    <div className="p-8 space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Schedules</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Schedules</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Manage your recurring payment schedules
           </p>
         </div>
-        <Link href="/dashboard/schedules/new">
-          <Button>Create schedule</Button>
+        <Link href="/dashboard/schedules/new" className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto">Create schedule</Button>
         </Link>
       </div>
 
@@ -54,19 +54,19 @@ export default async function SchedulesPage({
       </div>
 
       {schedules.length === 0 ? (
-        <div className="border-2 border-dashed rounded-lg p-12 text-center space-y-4">
-          <h3 className="text-lg font-semibold">No schedules found</h3>
-          <p className="text-muted-foreground max-w-md mx-auto">
+        <div className="border-2 border-dashed rounded-lg p-6 sm:p-8 lg:p-12 text-center space-y-4">
+          <h3 className="text-base sm:text-lg font-semibold">No schedules found</h3>
+          <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
             {searchParams.status
               ? `You don't have any ${searchParams.status} schedules.`
               : 'Create your first payment schedule to start automating.'}
           </p>
-          <Link href="/dashboard/schedules/new">
-            <Button>Create your first schedule</Button>
+          <Link href="/dashboard/schedules/new" className="inline-block w-full sm:w-auto">
+            <Button className="w-full sm:w-auto">Create your first schedule</Button>
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
           {schedules.map((schedule: Schedule) => (
             <ScheduleCard key={schedule.id} schedule={schedule} />
           ))}
