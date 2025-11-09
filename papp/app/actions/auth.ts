@@ -46,3 +46,32 @@ export async function logoutAction() {
     return { success: false, error: (error as Error).message }
   }
 }
+
+
+export async function requestPasswordResetAction(formData: FormData) {
+  try {
+    const email = formData.get('email') as string
+    await api.auth.requestPasswordReset(email)
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: (error as Error).message }
+  }
+}
+
+export async function resetPasswordAction(token: string, newPassword: string) {
+  try {
+    await api.auth.resetPassword(token, newPassword)
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: (error as Error).message };
+  }
+}
+
+export async function changePasswordAction(currentPassword: string, newPassword: string) {
+  try {
+    await api.auth.changePassword(currentPassword, newPassword)
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: (error as Error).message };
+  }
+}
