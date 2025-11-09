@@ -1,7 +1,7 @@
 'use client';
 
 import { logoutAction } from '@/app/actions/auth';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,14 +26,13 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
         <div className="md:hidden">
           <h2 className="text-xl font-bold">Payday</h2>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 ml-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  {user.firstName?.[0] || user.email[0].toUpperCase()}
-                </div>
-              </Button>
+              <Avatar>
+                <AvatarFallback>{user.firstName?.[0] || user.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                <AvatarImage src={`https://ui-avatars.com/api/?name=${user.firstName} ${user.lastName}&background=random`} />
+              </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end">
               <div className="flex flex-col space-y-1 p-2">
