@@ -21,6 +21,7 @@ async function getWalletData() {
       apiServer.wallet.get(),
       apiServer.wallet.balance(),
     ])
+    console.log(wallet, balance)
     return { wallet: wallet as Wallet, balance: balance as Balance }
   } catch {
     return { wallet: null, balance: null }
@@ -29,12 +30,14 @@ async function getWalletData() {
 
 export default async function WalletPage() {
   const { wallet, balance } = await getWalletData()
-
   if (!balance || !wallet) {
     return (
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="border-2 border-dashed rounded-lg p-6 sm:p-8 lg:p-12 text-center">
-          <p className="text-sm sm:text-base text-muted-foreground">Unable to load wallet data</p>
+          <h4 className="text-lg sm:text-xl font-semibold">Unable to load wallet data</h4>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Please refresh the page or contact support if the issue persists.
+          </p>
         </div>
       </div>
     )
