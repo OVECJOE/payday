@@ -9,6 +9,7 @@ import { getRecipientsAction } from '@/app/actions/recipients';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -29,7 +30,7 @@ import type { Schedule } from '@/lib/types';
 import type { Recipient } from '@/lib/types';
 
 const scheduleSchema = z.object({
-  recipientId: z.string().min(1, 'Recipient is required'),
+  recipientIds: z.array(z.string()).min(1, 'At least one recipient is required'),
   amount: z.string().refine((val) => parseFloat(val) > 0, 'Amount must be greater than 0'),
   frequency: z.enum(['daily', 'weekly', 'monthly', 'custom']),
   startDate: z.string().min(1, 'Start date is required'),
@@ -63,6 +64,7 @@ export function CreateScheduleDialog({
 }: CreateScheduleDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [recipients, setRecipients] = useState<Recipient[]>([]);
+  const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
   const [frequency, setFrequency] = useState<string>('daily');
 
   const {
@@ -71,9 +73,11 @@ export function CreateScheduleDialog({
     formState: { errors },
     setValue,
     reset,
+    watch,
   } = useForm<ScheduleFormData>({
     resolver: zodResolver(scheduleSchema),
     defaultValues: {
+      recipientIds: [],
       frequency: 'daily',
       hour: '9',
       minute: '0',
@@ -87,71 +91,168 @@ export function CreateScheduleDialog({
         .catch(() => {
           toast.error('Failed to load recipients');
         });
+    } else {
+      setSelectedRecipients([]);
+      reset();
     }
-  }, [open]);
+  }, [open, reset]);
+
+  const toggleRecipient = (recipientId: string) => {
+    const newSelection = selectedRecipients.includes(recipientId)
+      ? selectedRecipients.filter((id) => id !== recipientId)
+      : [...selectedRecipients, recipientId];
+    setSelectedRecipients(newSelection);
+    setValue('recipientIds', newSelection, { shouldValidate: true });
+  };
+
+  const selectAll = () => {
+    const allIds = recipients.map((r) => r.id);
+    setSelectedRecipients(allIds);
+    setValue('recipientIds', allIds, { shouldValidate: true });
+  };
+
+  const deselectAll = () => {
+    setSelectedRecipients([]);
+    setValue('recipientIds', [], { shouldValidate: true });
+  };
 
   const onSubmit = async (data: ScheduleFormData) => {
+    if (data.recipientIds.length === 0) {
+      toast.error('Please select at least one recipient');
+      return;
+    }
+
     setIsLoading(true);
-    const formData = new FormData();
-    formData.append('recipientId', data.recipientId);
-    formData.append('amount', data.amount);
-    formData.append('frequency', data.frequency);
-    formData.append('startDate', data.startDate);
-    if (data.endDate) formData.append('endDate', data.endDate);
-    formData.append('hour', data.hour);
-    formData.append('minute', data.minute);
-    if (data.dayOfWeek) formData.append('dayOfWeek', data.dayOfWeek);
-    if (data.dayOfMonth) formData.append('dayOfMonth', data.dayOfMonth);
-    if (data.customIntervalDays) formData.append('customIntervalDays', data.customIntervalDays);
-    if (data.description) formData.append('description', data.description);
+    let successCount = 0;
+    let errorCount = 0;
 
-    const result = await createScheduleAction(formData);
-    setIsLoading(false);
+    try {
+      await Promise.all(
+        data.recipientIds.map(async (recipientId) => {
+          const formData = new FormData();
+          formData.append('recipientId', recipientId);
+          formData.append('amount', data.amount);
+          formData.append('frequency', data.frequency);
+          formData.append('startDate', data.startDate);
+          if (data.endDate) formData.append('endDate', data.endDate);
+          formData.append('hour', data.hour);
+          formData.append('minute', data.minute);
+          if (data.dayOfWeek) formData.append('dayOfWeek', data.dayOfWeek);
+          if (data.dayOfMonth) formData.append('dayOfMonth', data.dayOfMonth);
+          if (data.customIntervalDays) formData.append('customIntervalDays', data.customIntervalDays);
+          if (data.description) formData.append('description', data.description);
 
-    if (result?.error) {
-      toast.error(result.error);
-    } else if (result?.data) {
-      toast.success('Schedule created successfully');
-      reset();
-      onSuccess(result.data as Schedule);
+          const result = await createScheduleAction(formData);
+          if (result?.error) {
+            errorCount++;
+          } else {
+            successCount++;
+          }
+        })
+      );
+
+      if (successCount > 0) {
+        toast.success(
+          `Successfully created ${successCount} schedule${successCount > 1 ? 's' : ''}${
+            errorCount > 0 ? ` (${errorCount} failed)` : ''
+          }`
+        );
+        reset();
+        setSelectedRecipients([]);
+        onSuccess({} as Schedule);
+      } else {
+        toast.error('Failed to create schedules');
+      }
+    } catch {
+      toast.error('An error occurred while creating schedules');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create Schedule</DialogTitle>
+          <DialogTitle>Create Payment Schedule</DialogTitle>
           <DialogDescription>
-            Set up a new recurring payment schedule
+            Set up recurring payment schedules for one or more recipients
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="recipientId">Recipient</Label>
-              <Select
-                onValueChange={(value) => setValue('recipientId', value)}
-                disabled={isLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a recipient" />
-                </SelectTrigger>
-                <SelectContent>
-                  {recipients.map((recipient) => (
-                    <SelectItem key={recipient.id} value={recipient.id}>
-                      {recipient.name} ({recipient.bankName})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.recipientId && (
-                <p className="text-sm text-destructive">{errors.recipientId.message}</p>
+          <div className="space-y-6 py-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Recipients</Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={selectAll}
+                    disabled={isLoading || recipients.length === 0}
+                  >
+                    Select All
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={deselectAll}
+                    disabled={isLoading || selectedRecipients.length === 0}
+                  >
+                    Deselect All
+                  </Button>
+                </div>
+              </div>
+              <div className="border rounded-lg p-4 max-h-48 overflow-y-auto space-y-3">
+                {recipients.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No recipients available. Please add recipients first.
+                  </p>
+                ) : (
+                  recipients.map((recipient) => (
+                    <div
+                      key={recipient.id}
+                      className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50 transition-colors"
+                    >
+                      <Checkbox
+                        id={`recipient-${recipient.id}`}
+                        checked={selectedRecipients.includes(recipient.id)}
+                        onCheckedChange={() => toggleRecipient(recipient.id)}
+                        disabled={isLoading}
+                      />
+                      <Label
+                        htmlFor={`recipient-${recipient.id}`}
+                        className="flex-1 cursor-pointer font-normal"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{recipient.name}</span>
+                          <span className="text-sm text-muted-foreground ml-2">
+                            {recipient.bankName}
+                          </span>
+                        </div>
+                        <div className="text-xs text-muted-foreground font-mono">
+                          {recipient.accountNumber}
+                        </div>
+                      </Label>
+                    </div>
+                  ))
+                )}
+              </div>
+              {errors.recipientIds && (
+                <p className="text-sm text-destructive">{errors.recipientIds.message}</p>
+              )}
+              {selectedRecipients.length > 0 && (
+                <p className="text-sm text-muted-foreground">
+                  {selectedRecipients.length} recipient{selectedRecipients.length > 1 ? 's' : ''}{' '}
+                  selected
+                </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount (NGN)</Label>
+              <Label htmlFor="amount">Amount per Recipient (NGN)</Label>
               <Input
                 id="amount"
                 type="number"
@@ -162,6 +263,11 @@ export function CreateScheduleDialog({
               />
               {errors.amount && (
                 <p className="text-sm text-destructive">{errors.amount.message}</p>
+              )}
+              {selectedRecipients.length > 1 && (
+                <p className="text-xs text-muted-foreground">
+                  Total amount: {formatCurrency(parseFloat(watch('amount') || '0') * selectedRecipients.length)}
+                </p>
               )}
             </div>
 
@@ -295,8 +401,10 @@ export function CreateScheduleDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create Schedule'}
+            <Button type="submit" disabled={isLoading || selectedRecipients.length === 0}>
+              {isLoading
+                ? 'Creating...'
+                : `Create ${selectedRecipients.length > 1 ? `${selectedRecipients.length} ` : ''}Schedule${selectedRecipients.length > 1 ? 's' : ''}`}
             </Button>
           </DialogFooter>
         </form>
@@ -305,3 +413,11 @@ export function CreateScheduleDialog({
   );
 }
 
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: 'NGN',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
