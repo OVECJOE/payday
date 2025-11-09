@@ -52,19 +52,19 @@ export class Transaction {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ type: 'uuid' })
-  scheduleId: string;
+  @Column({ type: 'uuid', nullable: true })
+  scheduleId?: string;
 
   @ManyToOne(() => RecurringSchedule, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'scheduleId' })
-  schedule: RecurringSchedule;
+  schedule?: RecurringSchedule;
 
   @Column({ type: 'uuid', nullable: true })
-  recipientId: string;
+  recipientId?: string;
 
   @ManyToOne(() => Recipient, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'recipientId' })
-  recipient: Recipient;
+  recipient?: Recipient;
 
   @Column({ type: 'decimal', precision: 15, scale: 2 })
   amount: number;

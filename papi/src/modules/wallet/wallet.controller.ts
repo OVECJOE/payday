@@ -75,7 +75,6 @@ export class WalletController {
     const transaction = this.transactionRepository.create({
       idempotencyKey,
       userId,
-      scheduleId: idempotencyKey,
       amount: dto.amount,
       fee: 0,
       type: TransactionType.WALLET_FUNDING,
