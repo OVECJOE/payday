@@ -25,7 +25,7 @@ export function CTASection() {
                 </Button>
               </Link>
               <Link href="/login">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-6 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
+                <Button size="lg" className="w-full sm:w-auto text-lg px-8 py-6">
                   Sign in
                 </Button>
               </Link>
