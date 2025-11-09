@@ -7,6 +7,7 @@ import {
   Inject,
   forwardRef,
 } from '@nestjs/common';
+import { IsNumber, IsEmail, Min } from 'class-validator';
 import { WalletService } from './wallet.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
@@ -24,7 +25,11 @@ import { EncryptionService } from '@common/services/encryption.service';
 import { User } from '../user/entities/user.entity';
 
 class FundWalletDto {
+  @IsNumber()
+  @Min(100)
   amount: number;
+
+  @IsEmail()
   email: string;
 }
 

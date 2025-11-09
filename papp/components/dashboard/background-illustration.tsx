@@ -22,8 +22,8 @@ export function BackgroundIllustration() {
   };
 
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none opacity-5 dark:opacity-10">
-      <div className="absolute inset-0">
+    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none opacity-[0.08] dark:opacity-[0.12]">
+      <div className="absolute inset-0 w-full h-full">
         {getIllustration()}
       </div>
     </div>
@@ -37,8 +37,9 @@ function DashboardBackground() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className="w-full h-full"
+      preserveAspectRatio="xMidYMid slice"
     >
-      <g stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <g stroke="hsl(var(--foreground))" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
         <path d="M100 200 Q200 150 300 200 T500 200" />
         <path d="M100 300 Q200 250 300 300 T500 300" />
         <path d="M100 400 Q200 350 300 400 T500 400" />
@@ -61,8 +62,9 @@ function RecipientsBackground() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className="w-full h-full"
+      preserveAspectRatio="xMidYMid slice"
     >
-      <g stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <g stroke="hsl(var(--foreground))" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="200" cy="150" r="30" />
         <path d="M170 200 Q200 180 230 200" />
         <rect x="150" y="220" width="100" height="60" rx="5" />
@@ -93,8 +95,9 @@ function SchedulesBackground() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className="w-full h-full"
+      preserveAspectRatio="xMidYMid slice"
     >
-      <g stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <g stroke="hsl(var(--foreground))" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
         <rect x="100" y="100" width="200" height="200" rx="10" />
         <path d="M100 150 L300 150" />
         <circle cx="150" cy="200" r="5" />
@@ -129,8 +132,9 @@ function TransactionsBackground() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className="w-full h-full"
+      preserveAspectRatio="xMidYMid slice"
     >
-      <g stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <g stroke="hsl(var(--foreground))" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
         <rect x="100" y="100" width="300" height="200" rx="10" />
         <path d="M100 150 L400 150" />
         <path d="M150 200 L350 200" />
@@ -164,8 +168,9 @@ function WalletBackground() {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className="w-full h-full"
+      preserveAspectRatio="xMidYMid slice"
     >
-      <g stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <g stroke="hsl(var(--foreground))" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
         <rect x="200" y="150" width="300" height="200" rx="15" />
         <path d="M200 200 L500 200" />
         <path d="M250 250 L450 250" />
@@ -174,7 +179,7 @@ function WalletBackground() {
         
         <circle cx="700" cy="200" r="50" />
         <circle cx="700" cy="200" r="30" />
-        <circle cx="700" cy="200" r="10" fill="currentColor" />
+        <circle cx="700" cy="200" r="10" fill="hsl(var(--foreground))" />
         
         <path d="M850 150 L1050 150 M950 100 L950 200" />
         <path d="M850 250 L1050 250" />
