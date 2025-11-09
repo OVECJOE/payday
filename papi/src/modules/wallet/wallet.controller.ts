@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
@@ -25,6 +33,7 @@ class FundWalletDto {
 export class WalletController {
   constructor(
     private walletService: WalletService,
+    @Inject(forwardRef(() => PaystackProvider))
     private paystackProvider: PaystackProvider,
     @InjectRepository(Transaction)
     private transactionRepository: Repository<Transaction>,
