@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/format';
 import { FundWalletDialog } from './fund-wallet-dialog';
@@ -66,13 +66,10 @@ export function WalletOverviewClient({
           <p className="text-muted-foreground">Manage your payment wallet</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setShowDetails((prev) => !prev)}
-          >
+          <Button variant="outline" size="sm" onClick={() => setIsFundDialogOpen(true)}>Fund Wallet</Button>
+          <Button variant="outline" size="sm" onClick={() => setShowDetails((prev) => !prev)} className="hidden md:block">
             {showDetails ? 'Hide Details' : 'Show Details'}
           </Button>
-          <Button onClick={() => setIsFundDialogOpen(true)}>Fund Wallet</Button>
         </div>
       </div>
 
@@ -116,6 +113,12 @@ export function WalletOverviewClient({
                 </div>
               </div>
             </CardContent>
+            <CardFooter className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => setIsFundDialogOpen(true)}>Fund Wallet</Button>
+              <Button variant="outline" size="sm" onClick={() => setShowDetails((prev) => !prev)} className="block md:hidden">
+                {showDetails ? 'Hide' : 'Show'} Details
+              </Button>
+            </CardFooter>
           </Card>
 
           <div className="grid gap-4 sm:grid-cols-2">
