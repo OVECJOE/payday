@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 export default async function RecipientsPage() {
-  await requireAuth();
+  await requireAuth('/dashboard/recipients');
   
   const recipients = await getRecipientsAction().catch(() => []);
 

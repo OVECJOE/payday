@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/format';
@@ -34,7 +35,8 @@ export function DashboardOverview({ balance, stats, recentTransactions }: Dashbo
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Link href="/dashboard/wallet" className="block">
+          <Card className="h-full cursor-pointer transition hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Available Balance</CardTitle>
           </CardHeader>
@@ -44,9 +46,11 @@ export function DashboardOverview({ balance, stats, recentTransactions }: Dashbo
               {formatCurrency(balance.locked)} locked
             </p>
           </CardContent>
-        </Card>
+          </Card>
+        </Link>
 
-        <Card>
+        <Link href="/dashboard/schedules" className="block">
+          <Card className="h-full cursor-pointer transition hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Schedules</CardTitle>
           </CardHeader>
@@ -56,9 +60,11 @@ export function DashboardOverview({ balance, stats, recentTransactions }: Dashbo
               {stats.total} total schedules
             </p>
           </CardContent>
-        </Card>
+          </Card>
+        </Link>
 
-        <Card>
+        <Link href="/dashboard/schedules" className="block">
+          <Card className="h-full cursor-pointer transition hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Scheduled Amount</CardTitle>
           </CardHeader>
@@ -68,9 +74,11 @@ export function DashboardOverview({ balance, stats, recentTransactions }: Dashbo
               {stats.successRate.toFixed(1)}% success rate
             </p>
           </CardContent>
-        </Card>
+          </Card>
+        </Link>
 
-        <Card>
+        <Link href="/dashboard/wallet" className="block">
+          <Card className="h-full cursor-pointer transition hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
           </CardHeader>
@@ -80,14 +88,25 @@ export function DashboardOverview({ balance, stats, recentTransactions }: Dashbo
               All funds
             </p>
           </CardContent>
-        </Card>
+          </Card>
+        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-            <CardDescription>Your latest payment activity</CardDescription>
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <CardTitle>Recent Transactions</CardTitle>
+                <CardDescription>Your latest payment activity</CardDescription>
+              </div>
+              <Link
+                href="/dashboard/transactions"
+                className="text-sm text-primary hover:underline"
+              >
+                View all
+              </Link>
+            </div>
           </CardHeader>
           <CardContent>
             {recentTransactions.length === 0 ? (
@@ -95,7 +114,11 @@ export function DashboardOverview({ balance, stats, recentTransactions }: Dashbo
             ) : (
               <div className="space-y-4">
                 {recentTransactions.map((transaction) => (
-                  <div key={transaction.id} className="flex items-center justify-between">
+                  <Link
+                    key={transaction.id}
+                    href={`/dashboard/transactions/${transaction.id}`}
+                    className="flex items-center justify-between rounded-md border p-4 transition hover:bg-muted/60"
+                  >
                     <div className="space-y-1">
                       <p className="text-sm font-medium">
                         {transaction.recipient?.name || 'Payment'}
@@ -108,22 +131,27 @@ export function DashboardOverview({ balance, stats, recentTransactions }: Dashbo
                       <p className="text-sm font-medium">
                         {formatCurrency(transaction.amount)}
                       </p>
-                      <p className={`text-xs ${
-                        transaction.status === 'success' ? 'text-green-600' :
-                        transaction.status === 'failed' ? 'text-destructive' :
-                        'text-muted-foreground'
-                      }`}>
+                      <p
+                        className={`text-xs ${
+                          transaction.status === 'success'
+                            ? 'text-green-600'
+                            : transaction.status === 'failed'
+                            ? 'text-destructive'
+                            : 'text-muted-foreground'
+                        }`}
+                      >
                         {transaction.status}
                       </p>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
           </CardContent>
         </Card>
 
-        <Card>
+        <Link href="/dashboard/schedules" className="block">
+          <Card className="h-full cursor-pointer transition hover:shadow-md">
           <CardHeader>
             <CardTitle>Schedule Status</CardTitle>
             <CardDescription>Overview of your payment schedules</CardDescription>
@@ -144,7 +172,8 @@ export function DashboardOverview({ balance, stats, recentTransactions }: Dashbo
               </div>
             </div>
           </CardContent>
-        </Card>
+          </Card>
+        </Link>
       </div>
     </div>
   );

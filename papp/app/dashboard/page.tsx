@@ -10,7 +10,7 @@ export const metadata = {
 };
 
 export default async function DashboardPage() {
-  await requireAuth();
+  await requireAuth('/dashboard');
   
   const [balance, stats, transactions] = await Promise.all([
     getBalanceAction().catch(() => ({ total: 0, available: 0, locked: 0 })),

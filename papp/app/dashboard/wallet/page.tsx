@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 export default async function WalletPage() {
-  await requireAuth();
+  await requireAuth('/dashboard/wallet');
   
   const [balance, wallet] = await Promise.all([
     getBalanceAction().catch(() => ({ total: 0, available: 0, locked: 0 })),

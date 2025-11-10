@@ -29,4 +29,3 @@ export async function getTransactionAction(id: string) {
     throw new Error('Failed to fetch transaction');
   }
 }
-

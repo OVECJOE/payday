@@ -1,3 +1,5 @@
+import type { Transaction } from './types';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
 export class ApiError extends Error {
@@ -20,7 +22,7 @@ async function fetchApi<T>(
   options: RequestInit = {},
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   const config: RequestInit = {
     ...options,
     headers: {
@@ -377,36 +379,14 @@ export const api = {
 
   transactions: {
     list: (token: string, limit = 50, offset = 0) =>
-      fetchWithAuth<{
-        transactions: Array<{
-          id: string;
-          amount: number;
-          fee: number;
-          type: string;
-          status: string;
-          provider: string;
-          description?: string;
-          createdAt: string;
-          completedAt?: string;
-          recipient?: { name: string; bankName: string };
-        }>;
-        total: number;
-      }>(`/transactions?limit=${limit}&offset=${offset}`, { method: 'GET' }, token),
+      fetchWithAuth<{ transactions: Transaction[]; total: number }>(
+        `/transactions?limit=${limit}&offset=${offset}`,
+        { method: 'GET' },
+        token,
+      ),
 
     get: (id: string, token: string) =>
-      fetchWithAuth<{
-        id: string;
-        amount: number;
-        fee: number;
-        type: string;
-        status: string;
-        provider: string;
-        description?: string;
-        createdAt: string;
-        completedAt?: string;
-        failureReason?: string;
-        recipient?: { name: string; bankName: string };
-      }>(`/transactions/${id}`, { method: 'GET' }, token),
+      fetchWithAuth<Transaction>(`/transactions/${id}`, { method: 'GET' }, token),
   },
 };
 

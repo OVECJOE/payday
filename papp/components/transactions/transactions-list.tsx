@@ -1,6 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/format';
 import type { Transaction } from '@/lib/types';
@@ -31,36 +32,39 @@ export function TransactionsList({ initialTransactions, total }: TransactionsLis
       <CardContent>
         <div className="space-y-4">
           {initialTransactions.map((transaction) => (
-            <div
+            <Link
               key={transaction.id}
-              className="flex items-center justify-between p-4 border rounded-lg"
+              href={`/dashboard/transactions/${transaction.id}`}
+              className="block"
             >
-              <div className="space-y-1">
-                <p className="font-medium">
-                  {transaction.recipient?.name || 'Payment'}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {format(new Date(transaction.createdAt), 'MMM d, yyyy HH:mm')}
-                </p>
-                {transaction.description && (
-                  <p className="text-sm text-muted-foreground">{transaction.description}</p>
-                )}
+              <div className="flex items-center justify-between rounded-lg border p-4 transition hover:bg-muted/60">
+                <div className="space-y-1">
+                  <p className="font-medium">
+                    {transaction.recipient?.name || 'Payment'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(new Date(transaction.createdAt), 'MMM d, yyyy HH:mm')}
+                  </p>
+                  {transaction.description && (
+                    <p className="text-sm text-muted-foreground">{transaction.description}</p>
+                  )}
+                </div>
+                <div className="text-right">
+                  <p className="font-medium">{formatCurrency(transaction.amount)}</p>
+                  <p
+                    className={`text-sm ${
+                      transaction.status === 'success'
+                        ? 'text-green-600'
+                        : transaction.status === 'failed'
+                        ? 'text-destructive'
+                        : 'text-muted-foreground'
+                    }`}
+                  >
+                    {transaction.status}
+                  </p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="font-medium">{formatCurrency(transaction.amount)}</p>
-                <p
-                  className={`text-sm ${
-                    transaction.status === 'success'
-                      ? 'text-green-600'
-                      : transaction.status === 'failed'
-                      ? 'text-destructive'
-                      : 'text-muted-foreground'
-                  }`}
-                >
-                  {transaction.status}
-                </p>
-              </div>
-            </div>
+            </Link>
           ))}
         </div>
       </CardContent>

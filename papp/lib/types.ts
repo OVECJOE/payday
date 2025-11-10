@@ -40,10 +40,14 @@ export interface Transaction {
   type: string;
   status: string;
   provider: string;
+  providerReference?: string;
   description?: string;
   createdAt: string;
   completedAt?: string;
   failureReason?: string;
+  metadata?: Record<string, unknown> | null;
+  providerResponse?: Record<string, unknown> | null;
+  idempotencyKey?: string;
+  retryCount?: number;
   recipient?: { name: string; bankName: string };
 }
-

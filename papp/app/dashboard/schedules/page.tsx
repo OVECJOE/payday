@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 export default async function SchedulesPage() {
-  await requireAuth();
+  await requireAuth('/dashboard/schedules');
   
   const schedules = await getSchedulesAction().catch(() => []);
 

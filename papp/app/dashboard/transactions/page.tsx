@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 export default async function TransactionsPage() {
-  await requireAuth();
+  await requireAuth('/dashboard/transactions');
   
   const transactionsData = await getTransactionsAction(50, 0).catch(() => ({
     transactions: [],

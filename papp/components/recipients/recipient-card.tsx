@@ -12,6 +12,7 @@ import {
 import { deleteRecipientAction } from '@/app/actions/recipients';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { RecipientDetailDialog } from './recipient-detail-dialog';
 import type { Recipient } from '@/lib/types';
 
 interface RecipientCardProps {
@@ -22,6 +23,7 @@ interface RecipientCardProps {
 export function RecipientCard({ recipient, onDeleted }: RecipientCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -38,7 +40,10 @@ export function RecipientCard({ recipient, onDeleted }: RecipientCardProps) {
 
   return (
     <>
-      <Card>
+      <Card
+        className="cursor-pointer transition-shadow hover:shadow-md"
+        onClick={() => setShowDetailDialog(true)}
+      >
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="space-y-1">
@@ -47,10 +52,22 @@ export function RecipientCard({ recipient, onDeleted }: RecipientCardProps) {
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">•••</Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  •••
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} disabled={isDeleting}>
+                <DropdownMenuItem
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setShowDeleteDialog(true);
+                  }}
+                  disabled={isDeleting}
+                >
                   Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -96,6 +113,12 @@ export function RecipientCard({ recipient, onDeleted }: RecipientCardProps) {
         description="Are you sure you want to delete this recipient? This action cannot be undone."
         confirmText="Delete"
         variant="destructive"
+      />
+
+      <RecipientDetailDialog
+        recipient={recipient}
+        open={showDetailDialog}
+        onOpenChange={setShowDetailDialog}
       />
     </>
   );

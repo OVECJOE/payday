@@ -100,4 +100,3 @@ export async function requireGuest(): Promise<void> {
     redirect('/dashboard');
   }
 }
-
