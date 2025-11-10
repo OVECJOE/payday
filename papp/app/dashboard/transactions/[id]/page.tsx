@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { getTransactionAction } from '@/app/actions/transactions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/format';
+import { Button } from '@/components/ui/button';
 
 interface TransactionDetailPageProps {
   params: Promise<{
@@ -55,7 +56,7 @@ export default async function TransactionDetailPage({ params }: TransactionDetai
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Transaction Details</h1>
           <p className="text-muted-foreground">
@@ -65,8 +66,10 @@ export default async function TransactionDetailPage({ params }: TransactionDetai
             </code>
           </p>
         </div>
-        <Link href="/dashboard/transactions" className="text-sm text-primary hover:underline">
-          Back <span className='text-primary-foreground font-medium hidden md:inline'>to transactions</span>
+        <Link href="/dashboard/transactions">
+          <Button variant="outline" size="sm">
+            Back <span className='text-primary-foreground font-medium hidden md:inline'>to transactions</span>
+          </Button>
         </Link>
       </div>
 

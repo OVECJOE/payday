@@ -1,4 +1,6 @@
 import { requireAuth } from '@/lib/auth';
+import { api, ApiError } from '@/lib/api';
+import { redirect } from 'next/navigation';
 import { DashboardNav } from '@/components/dashboard/dashboard-nav';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { MobileNav } from '@/components/dashboard/mobile-nav';
@@ -13,7 +15,14 @@ export default async function DashboardLayout({
   const headersList = await headers();
   const pathname = headersList.get('x-pathname') || '/dashboard';
   
-  const { user } = await requireAuth(pathname);
+  const { token, user } = await requireAuth(pathname);
+  try {
+    await api.wallet.getBalance(token);
+  } catch (error) {
+    if (error instanceof ApiError && error.isUnauthorized()) {
+      redirect(`/refresh-token?returnTo=${encodeURIComponent(pathname)}`);
+    }
+  }
 
   return (
     <div className="min-h-screen relative">
