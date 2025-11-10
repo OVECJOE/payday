@@ -18,9 +18,9 @@ export function DashboardNav() {
   return (
     <nav className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 border-r bg-card">
       <div className="flex flex-col flex-grow pt-6 pb-4 overflow-y-auto">
-        <div className="flex items-center flex-shrink-0 px-6 mb-8">
+        <Link href="/dashboard" className="flex items-center flex-shrink-0 px-6 mb-8">
           <h2 className="text-2xl font-bold">Payday</h2>
-        </div>
+        </Link>
         <div className="mt-6 flex-1 flex flex-col px-3 space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
