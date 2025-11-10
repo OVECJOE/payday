@@ -8,6 +8,7 @@ import { formatCurrency } from '@/lib/format';
 import { FundWalletDialog } from './fund-wallet-dialog';
 import { toast } from 'sonner';
 import type { User } from '@/lib/auth';
+import { EyeIcon, EyeOffIcon, PlusIcon } from 'lucide-react';
 
 interface WalletOverviewClientProps {
   balance: {
@@ -114,9 +115,11 @@ export function WalletOverviewClient({
               </div>
             </CardContent>
             <CardFooter className="flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => setIsFundDialogOpen(true)}>Fund Wallet</Button>
-              <Button variant="outline" size="sm" onClick={() => setShowDetails((prev) => !prev)} className="block md:hidden">
-                {showDetails ? 'Hide' : 'Show'} Details
+              <Button variant="ghost" size="icon-sm" onClick={() => setIsFundDialogOpen(true)}>
+                <PlusIcon className="size-4" />
+              </Button>
+              <Button variant="ghost" size="icon-sm" onClick={() => setShowDetails((prev) => !prev)} className="block md:hidden">
+                {showDetails ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
               </Button>
             </CardFooter>
           </Card>
