@@ -55,7 +55,7 @@ export class Transaction {
   @Column({ type: 'uuid', nullable: true })
   scheduleId?: string;
 
-  @ManyToOne(() => RecurringSchedule, { onDelete: 'NO ACTION', nullable: true })
+  @ManyToOne(() => RecurringSchedule, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'scheduleId' })
   schedule?: RecurringSchedule;
 
