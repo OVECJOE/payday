@@ -3,12 +3,14 @@
 import { api } from '@/lib/api';
 import { requireAuth } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+import { handleServerActionError } from '@/lib/server-action-error-handler';
 
 export async function getSchedulesAction(status?: string) {
   try {
     const { token } = await requireAuth();
     return await api.schedules.list(token, status);
   } catch (error) {
+    await handleServerActionError(error, '/dashboard/schedules');
     if (error instanceof Error) {
       throw new Error(error.message);
     }
@@ -21,6 +23,7 @@ export async function getScheduleAction(id: string) {
     const { token } = await requireAuth();
     return await api.schedules.get(id, token);
   } catch (error) {
+    await handleServerActionError(error, '/dashboard/schedules');
     if (error instanceof Error) {
       throw new Error(error.message);
     }
@@ -130,6 +133,7 @@ export async function getScheduleStatsAction() {
     const { token } = await requireAuth();
     return await api.schedules.stats(token);
   } catch (error) {
+    await handleServerActionError(error, '/dashboard');
     if (error instanceof Error) {
       throw new Error(error.message);
     }

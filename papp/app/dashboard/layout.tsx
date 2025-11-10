@@ -3,13 +3,17 @@ import { DashboardNav } from '@/components/dashboard/dashboard-nav';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { MobileNav } from '@/components/dashboard/mobile-nav';
 import { BackgroundIllustration } from '@/components/dashboard/background-illustration';
+import { headers } from 'next/headers';
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user } = await requireAuth();
+  const headersList = await headers();
+  const pathname = headersList.get('x-pathname') || '/dashboard';
+  
+  const { user } = await requireAuth(pathname);
 
   return (
     <div className="min-h-screen relative">

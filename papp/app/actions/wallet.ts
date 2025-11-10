@@ -2,12 +2,14 @@
 
 import { api } from '@/lib/api';
 import { requireAuth } from '@/lib/auth';
+import { handleServerActionError } from '@/lib/server-action-error-handler';
 
 export async function getWalletAction() {
   try {
     const { token } = await requireAuth();
     return await api.wallet.get(token);
   } catch (error) {
+    await handleServerActionError(error, '/dashboard/wallet');
     if (error instanceof Error) {
       throw new Error(error.message);
     }
@@ -20,6 +22,7 @@ export async function getBalanceAction() {
     const { token } = await requireAuth();
     return await api.wallet.getBalance(token);
   } catch (error) {
+    await handleServerActionError(error);
     if (error instanceof Error) {
       throw new Error(error.message);
     }

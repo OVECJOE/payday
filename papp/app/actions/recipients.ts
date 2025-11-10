@@ -3,12 +3,14 @@
 import { api } from '@/lib/api';
 import { requireAuth } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+import { handleServerActionError } from '@/lib/server-action-error-handler';
 
 export async function getRecipientsAction(status?: string) {
   try {
     const { token } = await requireAuth();
     return await api.recipients.list(token, status);
   } catch (error) {
+    await handleServerActionError(error, '/dashboard/recipients');
     if (error instanceof Error) {
       throw new Error(error.message);
     }
@@ -21,6 +23,7 @@ export async function getRecipientAction(id: string) {
     const { token } = await requireAuth();
     return await api.recipients.get(id, token);
   } catch (error) {
+    await handleServerActionError(error, '/dashboard/recipients');
     if (error instanceof Error) {
       throw new Error(error.message);
     }
@@ -93,6 +96,7 @@ export async function validateBankAccountAction(accountNumber: string, bankCode:
     const { token } = await requireAuth();
     return await api.recipients.validateAccount({ accountNumber, bankCode }, token);
   } catch (error) {
+    await handleServerActionError(error, '/dashboard/recipients');
     if (error instanceof Error) {
       throw new Error(error.message);
     }
@@ -105,6 +109,7 @@ export async function getBanksAction() {
     const { token } = await requireAuth();
     return await api.recipients.getBanks(token);
   } catch (error) {
+    await handleServerActionError(error, '/dashboard/recipients');
     if (error instanceof Error) {
       throw new Error(error.message);
     }

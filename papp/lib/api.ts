@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
 export class ApiError extends Error {
@@ -10,6 +8,10 @@ export class ApiError extends Error {
   ) {
     super(message);
     this.name = 'ApiError';
+  }
+
+  isUnauthorized(): boolean {
+    return this.status === 401;
   }
 }
 
@@ -57,8 +59,6 @@ export async function fetchWithAuth<T>(
   options: RequestInit = {},
   token?: string,
 ): Promise<T> {
-  "use server";
-
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string> || {}),
   };
@@ -74,14 +74,12 @@ export async function fetchWithAuth<T>(
     });
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) {
-        const currentPath = window.location.pathname;
-        if (currentPath !== '/refresh-token' && currentPath !== '/login' && currentPath !== '/register') {
-          const returnTo = encodeURIComponent(
-            currentPath + window.location.search,
-          );
-          
-          redirect(`/refresh-token?returnTo=${returnTo}`);
-        }
+      if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname + window.location.search;
+        const returnTo = encodeURIComponent(currentPath);
+        window.location.href = `/refresh-token?returnTo=${returnTo}`;
+      }
+      throw error;
     }
     throw error;
   }
