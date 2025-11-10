@@ -16,7 +16,7 @@ export function DashboardNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 border-r bg-card">
+    <nav className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 border-r bg-card">
       <div className="flex flex-col flex-grow pt-6 pb-4 overflow-y-auto">
         <Link href="/dashboard" className="flex items-center flex-shrink-0 px-6 mb-8">
           <h2 className="text-2xl font-bold">Payday</h2>

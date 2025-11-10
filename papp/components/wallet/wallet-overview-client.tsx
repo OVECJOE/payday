@@ -203,7 +203,7 @@ export function WalletOverviewClient({
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="justify-end gap-2 flex md:hidden items-center p-2 bg-muted/50 rounded-b-lg">
+            <CardFooter className="justify-end gap-2 flex lg:hidden items-center p-2 bg-muted/50 rounded-b-lg">
               <Button variant="ghost" size="icon-sm" onClick={() => setIsFundDialogOpen(true)}>
                 <PlusIcon className="size-4" />
               </Button>
@@ -211,7 +211,7 @@ export function WalletOverviewClient({
                 variant="ghost"
                 size="icon-sm"
                 onClick={() => setShowDetails((prev) => !prev)}
-                className="block md:hidden"
+                className="block lg:hidden"
               >
                 {showDetails ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
               </Button>

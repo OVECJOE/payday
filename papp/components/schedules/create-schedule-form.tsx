@@ -394,7 +394,7 @@ export function CreateScheduleForm({ recipients }: CreateScheduleFormProps) {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="startDate">First run</Label>
             <Input id="startDate" type="datetime-local" {...register('startDate')} />
@@ -408,7 +408,7 @@ export function CreateScheduleForm({ recipients }: CreateScheduleFormProps) {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="hour">Preferred hour (0 - 23)</Label>
             <Input id="hour" type="number" min="0" max="23" {...register('hour')} />

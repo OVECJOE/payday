@@ -29,7 +29,7 @@ export function MobileNav() {
   );
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="w-full justify-between">

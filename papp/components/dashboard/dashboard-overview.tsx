@@ -28,13 +28,13 @@ interface DashboardOverviewProps {
 
 export function DashboardOverview({ balance, stats, recentTransactions }: DashboardOverviewProps) {
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-6 lg:space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">Welcome back! Here&apos;s your overview.</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 lg:grid-cols-2 lg:grid-cols-4">
         <Link href="/dashboard/wallet" className="block">
           <Card className="h-full cursor-pointer transition hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -92,7 +92,7 @@ export function DashboardOverview({ balance, stats, recentTransactions }: Dashbo
         </Link>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between gap-2">

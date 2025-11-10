@@ -68,7 +68,7 @@ export default async function TransactionDetailPage({ params }: TransactionDetai
         </div>
         <Link href="/dashboard/transactions">
           <Button variant="outline" size="sm">
-            Back <span className='text-primary-foreground font-medium hidden md:inline'>to transactions</span>
+            Back <span className='hidden lg:inline'>to transactions</span>
           </Button>
         </Link>
       </div>
@@ -96,7 +96,7 @@ export default async function TransactionDetailPage({ params }: TransactionDetai
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="h-max">
           <CardHeader>
             <CardTitle>Recipient</CardTitle>
             <CardDescription>Beneficiary of this transaction</CardDescription>
