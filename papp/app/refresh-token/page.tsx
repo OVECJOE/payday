@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { RefreshTokenForm } from '@/components/auth/refresh-token-form';
 
 export const metadata = {
@@ -15,7 +16,15 @@ export default async function RefreshTokenPage() {
             Your session has expired. Please confirm your identity to continue.
           </p>
         </div>
-        <RefreshTokenForm />
+        <Suspense
+          fallback={
+            <div className="rounded-md border bg-muted/40 p-6 text-center text-sm text-muted-foreground">
+              Preparing refresh form…
+            </div>
+          }
+        >
+          <RefreshTokenForm />
+        </Suspense>
       </div>
     </div>
   );

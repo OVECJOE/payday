@@ -141,10 +141,8 @@ export async function refreshTokenWithPasswordAction(formData: FormData) {
     );
 
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error) {
-      return { error: error.message };
-    }
-    return { error: 'Token refresh failed' };
+  } catch {
+    await clearAuthTokens();
+    redirect('/login');
   }
 }
