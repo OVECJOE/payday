@@ -37,57 +37,57 @@ export function DashboardOverview({ balance, stats, recentTransactions }: Dashbo
       <div className="grid gap-4 lg:grid-cols-2 lg:grid-cols-4">
         <Link href="/dashboard/wallet" className="block">
           <Card className="h-full cursor-pointer transition hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Available Balance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(balance.available)}</div>
-            <p className="text-xs text-muted-foreground">
-              {formatCurrency(balance.locked)} locked
-            </p>
-          </CardContent>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Available Balance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatCurrency(balance.available)}</div>
+              <p className="text-xs text-muted-foreground">
+                {formatCurrency(balance.locked)} locked
+              </p>
+            </CardContent>
           </Card>
         </Link>
 
         <Link href="/dashboard/schedules" className="block">
           <Card className="h-full cursor-pointer transition hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Schedules</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.active}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.total} total schedules
-            </p>
-          </CardContent>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Schedules</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.active}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.total} total schedules
+              </p>
+            </CardContent>
           </Card>
         </Link>
 
         <Link href="/dashboard/schedules" className="block">
           <Card className="h-full cursor-pointer transition hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Scheduled Amount</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.totalAmountScheduled)}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.successRate.toFixed(1)}% success rate
-            </p>
-          </CardContent>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Scheduled Amount</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatCurrency(stats.totalAmountScheduled)}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.successRate.toFixed(1)}% success rate
+              </p>
+            </CardContent>
           </Card>
         </Link>
 
         <Link href="/dashboard/wallet" className="block">
           <Card className="h-full cursor-pointer transition hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(balance.total)}</div>
-            <p className="text-xs text-muted-foreground">
-              All funds
-            </p>
-          </CardContent>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatCurrency(balance.total)}</div>
+              <p className="text-xs text-muted-foreground">
+                All funds
+              </p>
+            </CardContent>
           </Card>
         </Link>
       </div>
@@ -132,13 +132,12 @@ export function DashboardOverview({ balance, stats, recentTransactions }: Dashbo
                         {formatCurrency(transaction.amount)}
                       </p>
                       <p
-                        className={`text-xs ${
-                          transaction.status === 'success'
+                        className={`text-xs ${transaction.status === 'success'
                             ? 'text-green-600'
                             : transaction.status === 'failed'
-                            ? 'text-destructive'
-                            : 'text-muted-foreground'
-                        }`}
+                              ? 'text-destructive'
+                              : 'text-muted-foreground'
+                          }`}
                       >
                         {transaction.status}
                       </p>
@@ -151,27 +150,27 @@ export function DashboardOverview({ balance, stats, recentTransactions }: Dashbo
         </Card>
 
         <Link href="/dashboard/schedules" className="block">
-          <Card className="h-full cursor-pointer transition hover:shadow-md">
-          <CardHeader>
-            <CardTitle>Schedule Status</CardTitle>
-            <CardDescription>Overview of your payment schedules</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Active</span>
-                <span className="text-sm font-medium">{stats.active}</span>
+          <Card className="h-max cursor-pointer transition hover:shadow-md">
+            <CardHeader>
+              <CardTitle>Schedule Status</CardTitle>
+              <CardDescription>Overview of your payment schedules</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Active</span>
+                  <span className="text-sm font-medium">{stats.active}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Paused</span>
+                  <span className="text-sm font-medium">{stats.paused}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Total</span>
+                  <span className="text-sm font-medium">{stats.total}</span>
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Paused</span>
-                <span className="text-sm font-medium">{stats.paused}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Total</span>
-                <span className="text-sm font-medium">{stats.total}</span>
-              </div>
-            </div>
-          </CardContent>
+            </CardContent>
           </Card>
         </Link>
       </div>
