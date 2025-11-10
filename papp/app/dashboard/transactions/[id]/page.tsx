@@ -59,11 +59,14 @@ export default async function TransactionDetailPage({ params }: TransactionDetai
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Transaction Details</h1>
           <p className="text-muted-foreground">
-            Detailed view of transaction <span className="font-mono">{transaction.id}</span>
+            Detailed view of transaction {" "}
+            <code className="font-mono bg-muted px-1 py-0.5 rounded-md text-sm">
+              {transaction.id.slice(0, 8)}...{transaction.id.slice(-8)}
+            </code>
           </p>
         </div>
         <Link href="/dashboard/transactions" className="text-sm text-primary hover:underline">
-          Back to transactions
+          Back <span className='text-primary-foreground font-medium hidden md:inline'>to transactions</span>
         </Link>
       </div>
 
