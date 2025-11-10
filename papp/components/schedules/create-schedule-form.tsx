@@ -226,7 +226,7 @@ export function CreateScheduleForm({ recipients }: CreateScheduleFormProps) {
               Choose one or more recipients. You can search by name, account number, bank, email, or phone.
             </p>
           </div>
-          <Badge variant="secondary">
+          <Badge variant="secondary" className="text-xs">
             <UsersIcon className="mr-1 size-3.5" />
             {recipientCount} selected
           </Badge>
@@ -276,7 +276,7 @@ export function CreateScheduleForm({ recipients }: CreateScheduleFormProps) {
                         <div className="flex-1">
                           <div className="flex items-center justify-between gap-2">
                             <span className="font-medium">{recipient.name}</span>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-muted-foreground ml-auto text-right">
                               {recipient.bankName}
                             </span>
                           </div>
