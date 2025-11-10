@@ -1,9 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CreateScheduleDialog } from './create-schedule-dialog';
 import { ScheduleCard } from './schedule-card';
 import { ScheduleDetailDialog } from './schedule-detail-dialog';
 import { getScheduleAction } from '@/app/actions/schedules';
@@ -15,7 +15,6 @@ interface SchedulesListProps {
 
 export function SchedulesList({ initialSchedules }: SchedulesListProps) {
   const [schedules] = useState(initialSchedules);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
@@ -40,7 +39,9 @@ export function SchedulesList({ initialSchedules }: SchedulesListProps) {
   return (
     <>
       <div className="flex justify-end mb-4">
-        <Button onClick={() => setIsDialogOpen(true)}>Create Schedule</Button>
+        <Button asChild>
+          <Link href="/dashboard/schedules/new">Create Schedule</Link>
+        </Button>
       </div>
 
       {schedules.length === 0 ? (
@@ -52,7 +53,9 @@ export function SchedulesList({ initialSchedules }: SchedulesListProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => setIsDialogOpen(true)}>Create Schedule</Button>
+            <Button asChild>
+              <Link href="/dashboard/schedules/new">Create Schedule</Link>
+            </Button>
           </CardContent>
         </Card>
       ) : (
@@ -67,11 +70,6 @@ export function SchedulesList({ initialSchedules }: SchedulesListProps) {
           ))}
         </div>
       )}
-
-      <CreateScheduleDialog
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-      />
 
       <ScheduleDetailDialog
         schedule={selectedSchedule}
