@@ -55,13 +55,13 @@ export default async function TransactionDetailPage({ params }: TransactionDetai
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Transaction Details</h1>
           <p className="text-muted-foreground">
             Detailed view of transaction {" "}
             <code className="font-mono bg-muted px-1 py-0.5 rounded-md text-sm">
-              {transaction.id.slice(0, 8)}...{transaction.id.slice(-8)}
+              {transaction.id.slice(0, 4)}...{transaction.id.slice(-4)}
             </code>
           </p>
         </div>
