@@ -193,8 +193,19 @@ export class WebhookService {
   private async findTransactionByReference(
     reference: string,
   ): Promise<Transaction | null> {
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        reference,
+      );
+
+    if (isUuid) {
+      return this.transactionRepository.findOne({
+        where: [{ providerReference: reference }, { id: reference }],
+      });
+    }
+
     return this.transactionRepository.findOne({
-      where: [{ providerReference: reference }, { id: reference }],
+      where: { providerReference: reference },
     });
   }
 }

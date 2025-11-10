@@ -242,9 +242,10 @@ https://api.yourapp.com/api/webhooks/paystack
 
 Events to subscribe:
 
-- `transfer.success`
-- `transfer.failed`
-- `transfer.reversed`
+- `charge.success` - For wallet funding transactions
+- `transfer.success` - For outgoing payment transfers
+- `transfer.failed` - For failed payment transfers
+- `transfer.reversed` - For reversed payment transfers
 
 ## Rate Limits
 
