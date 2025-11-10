@@ -228,7 +228,7 @@ export function CreateScheduleForm({ recipients }: CreateScheduleFormProps) {
           </div>
           <Badge variant="secondary" className="text-xs">
             <UsersIcon className="mr-1 size-3.5" />
-            {recipientCount} selected
+            {recipientCount}
           </Badge>
         </div>
 
