@@ -45,3 +45,80 @@ export async function fundWalletAction(formData: FormData) {
     return { error: 'Failed to initialize wallet funding' };
   }
 }
+
+function parseAmount(formData: FormData): number | null {
+  const rawAmount = formData.get('amount');
+  if (typeof rawAmount !== 'string') {
+    return null;
+  }
+  const amount = Number(rawAmount);
+  if (Number.isNaN(amount) || amount <= 0) {
+    return null;
+  }
+  return amount;
+}
+
+export async function lockFundsAction(formData: FormData) {
+  const amount = parseAmount(formData);
+  if (amount === null) {
+    return { error: 'Enter a valid amount greater than zero.' };
+  }
+
+  try {
+    const { token } = await requireAuth();
+    const data = await api.wallet.lock(token, { amount });
+    if (!data.success) {
+      return {
+        error: `Unable to lock funds. Available balance: ${data.availableBalance.toLocaleString('en-NG', {
+          style: 'currency',
+          currency: 'NGN',
+        })}`,
+      };
+    }
+    return { success: true, data };
+  } catch (error) {
+    await handleServerActionError(error, '/dashboard/wallet');
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return { error: 'Failed to lock funds' };
+  }
+}
+
+export async function unlockFundsAction(formData: FormData) {
+  const amount = parseAmount(formData);
+  if (amount === null) {
+    return { error: 'Enter a valid amount greater than zero.' };
+  }
+
+  try {
+    const { token } = await requireAuth();
+    const data = await api.wallet.unlock(token, { amount });
+    return { success: true, data };
+  } catch (error) {
+    await handleServerActionError(error, '/dashboard/wallet');
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return { error: 'Failed to unlock funds' };
+  }
+}
+
+export async function withdrawFundsAction(formData: FormData) {
+  const amount = parseAmount(formData);
+  if (amount === null) {
+    return { error: 'Enter a valid amount greater than zero.' };
+  }
+
+  try {
+    const { token } = await requireAuth();
+    const data = await api.wallet.withdraw(token, { amount });
+    return { success: true, data };
+  } catch (error) {
+    await handleServerActionError(error, '/dashboard/wallet');
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return { error: 'Failed to withdraw funds' };
+  }
+}

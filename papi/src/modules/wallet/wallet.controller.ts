@@ -7,7 +7,7 @@ import {
   Inject,
   forwardRef,
 } from '@nestjs/common';
-import { IsNumber, IsEmail, Min } from 'class-validator';
+import { IsNumber, IsEmail, Min, IsPositive } from 'class-validator';
 import { WalletService } from './wallet.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
@@ -31,6 +31,12 @@ class FundWalletDto {
 
   @IsEmail()
   email: string;
+}
+
+class ModifyWalletAmountDto {
+  @IsNumber()
+  @IsPositive()
+  amount: number;
 }
 
 @Controller('wallet')
@@ -115,5 +121,36 @@ export class WalletController {
       authorizationUrl: paymentResult.authorizationUrl,
       reference: paymentResult.reference,
     };
+  }
+
+  @Post('lock')
+  async lockFunds(
+    @CurrentUser('id') userId: string,
+    @Body() dto: ModifyWalletAmountDto,
+  ): Promise<{
+    success: boolean;
+    availableBalance: number;
+    lockedAmount: number;
+  }> {
+    return this.walletService.lockFunds(userId, dto.amount);
+  }
+
+  @Post('unlock')
+  async unlockFunds(
+    @CurrentUser('id') userId: string,
+    @Body() dto: ModifyWalletAmountDto,
+  ): Promise<{ total: number; available: number; locked: number }> {
+    await this.walletService.unlockFunds(userId, dto.amount);
+    const balance = await this.walletService.getBalance(userId);
+    return balance;
+  }
+
+  @Post('withdraw')
+  async withdrawFunds(
+    @CurrentUser('id') userId: string,
+    @Body() dto: ModifyWalletAmountDto,
+  ): Promise<{ total: number; available: number; locked: number }> {
+    await this.walletService.debitWallet(userId, dto.amount, false);
+    return this.walletService.getBalance(userId);
   }
 }

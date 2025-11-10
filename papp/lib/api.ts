@@ -375,6 +375,36 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(data),
       }, token),
+
+    lock: (token: string, data: { amount: number }) =>
+      fetchWithAuth<{
+        success: boolean;
+        availableBalance: number;
+        lockedAmount: number;
+      }>('/wallet/lock', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, token),
+
+    unlock: (token: string, data: { amount: number }) =>
+      fetchWithAuth<{
+        total: number;
+        available: number;
+        locked: number;
+      }>('/wallet/unlock', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, token),
+
+    withdraw: (token: string, data: { amount: number }) =>
+      fetchWithAuth<{
+        total: number;
+        available: number;
+        locked: number;
+      }>('/wallet/withdraw', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }, token),
   },
 
   transactions: {
