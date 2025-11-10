@@ -96,7 +96,6 @@ export async function requireAuth(returnTo?: string): Promise<{ token: string; u
 
 export async function requireGuest(): Promise<void> {
   const token = await getAccessToken();
-  if (token) {
-    redirect('/dashboard');
-  }
+  const refreshToken = await getRefreshToken();
+  if (token && refreshToken) redirect('/dashboard');
 }

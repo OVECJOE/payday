@@ -1,6 +1,4 @@
 import { RefreshTokenForm } from '@/components/auth/refresh-token-form';
-import { getRefreshToken } from '@/lib/auth';
-import { redirect } from 'next/navigation';
 
 export const metadata = {
   title: 'Refresh Session - Payday',
@@ -8,9 +6,6 @@ export const metadata = {
 };
 
 export default async function RefreshTokenPage() {
-  const refreshToken = await getRefreshToken();
-  if (!refreshToken) redirect('/login');
-
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
