@@ -1,5 +1,5 @@
 import { RefreshTokenForm } from '@/components/auth/refresh-token-form';
-import { getRefreshToken, getUser } from '@/lib/auth';
+import { getRefreshToken } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
 export const metadata = {
@@ -9,11 +9,7 @@ export const metadata = {
 
 export default async function RefreshTokenPage() {
   const refreshToken = await getRefreshToken();
-  const user = await getUser();
-
-  if (!refreshToken || !user) {
-    redirect('/login');
-  }
+  if (!refreshToken) redirect('/login');
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
@@ -24,7 +20,7 @@ export default async function RefreshTokenPage() {
             Your session has expired. Please confirm your identity to continue.
           </p>
         </div>
-        <RefreshTokenForm userEmail={user.email} />
+        <RefreshTokenForm />
       </div>
     </div>
   );

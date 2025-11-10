@@ -18,11 +18,7 @@ const refreshTokenSchema = z.object({
 
 type RefreshTokenFormData = z.infer<typeof refreshTokenSchema>;
 
-interface RefreshTokenFormProps {
-  userEmail: string;
-}
-
-export function RefreshTokenForm({ userEmail }: RefreshTokenFormProps) {
+export function RefreshTokenForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -63,17 +59,6 @@ export function RefreshTokenForm({ userEmail }: RefreshTokenFormProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={userEmail}
-              disabled
-              className="bg-muted"
-            />
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <Input
