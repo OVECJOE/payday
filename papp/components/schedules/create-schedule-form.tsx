@@ -311,7 +311,7 @@ export function CreateScheduleForm({ recipients }: CreateScheduleFormProps) {
                   Clear selection
                 </Button>
               </div>
-              <Button type="button" onClick={() => setIsRecipientDialogOpen(false)}>
+              <Button type="button" onClick={() => setIsRecipientDialogOpen(false)} className="w-full">
                 Done
               </Button>
             </DialogFooter>
