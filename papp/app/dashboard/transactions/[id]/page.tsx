@@ -6,9 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { formatCurrency } from '@/lib/format';
 
 interface TransactionDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export const metadata = {
@@ -16,11 +16,9 @@ export const metadata = {
 };
 
 export default async function TransactionDetailPage({ params }: TransactionDetailPageProps) {
-  const transaction = await getTransactionAction(params.id).catch(() => null);
-
-  if (!transaction) {
-    notFound();
-  }
+  const { id } = await params;
+  const transaction = await getTransactionAction(id).catch(() => null);
+  if (!transaction) notFound();
 
   const detailRows: Array<{ label: string; value: string | number | undefined }> = [
     { label: 'Transaction Type', value: transaction.type },
@@ -160,4 +158,3 @@ export default async function TransactionDetailPage({ params }: TransactionDetai
     </div>
   );
 }
-
