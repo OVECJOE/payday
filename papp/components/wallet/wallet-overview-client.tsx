@@ -165,7 +165,7 @@ export function WalletOverviewClient({
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-6">
-          <Card className="relative overflow-hidden border-0 shadow-xl bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-primary-foreground">
+          <Card className="!pb-0 relative overflow-hidden border-0 shadow-xl bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-primary-foreground">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24 blur-2xl" />
             <CardContent className="p-8 relative z-10">
