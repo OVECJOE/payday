@@ -12,6 +12,7 @@ import { WalletModule } from '../wallet/wallet.module';
 import { QueueName } from '@config/queue.config';
 import { ScheduleService } from '../schedule/schedule.service';
 import { TimeService } from '@common/services/time.service';
+import { PaymentController } from './payment.controller';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TimeService } from '@common/services/time.service';
     BullModule.registerQueue({ name: QueueName.PAYMENT }),
     forwardRef(() => WalletModule),
   ],
+  controllers: [PaymentController],
   providers: [
     PaymentOrchestratorService,
     PaymentProcessorService,

@@ -23,6 +23,7 @@ import {
 } from '../transaction/entities/transaction.entity';
 import { EncryptionService } from '@common/services/encryption.service';
 import { User } from '../user/entities/user.entity';
+import { PaymentProcessorService } from '../payment/payment-processor.service';
 
 class FundWalletDto {
   @IsNumber()
@@ -51,6 +52,8 @@ export class WalletController {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private encryptionService: EncryptionService,
+    @Inject(forwardRef(() => PaymentProcessorService))
+    private paymentProcessorService: PaymentProcessorService,
   ) {}
 
   @Get()
@@ -78,16 +81,20 @@ export class WalletController {
     const idempotencyKey = this.encryptionService.generateIdempotencyKey();
     const reference = idempotencyKey;
 
+    const feeBreakdown = this.paymentProcessorService.estimateCollectionFee(
+      dto.amount,
+    );
+
     const transaction = this.transactionRepository.create({
       idempotencyKey,
       userId,
       amount: dto.amount,
-      fee: 0,
+      fee: feeBreakdown.totalFee,
       type: TransactionType.WALLET_FUNDING,
       status: TransactionStatus.PENDING,
       provider: PaymentProvider.PAYSTACK,
       description: 'Wallet funding',
-      metadata: { source: 'user_funding' },
+      metadata: { source: 'user_funding', feeBreakdown },
     });
 
     await this.transactionRepository.save(transaction);

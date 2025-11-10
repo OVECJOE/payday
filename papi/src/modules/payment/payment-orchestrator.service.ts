@@ -133,6 +133,10 @@ export class PaymentOrchestratorService {
     return provider.getBanks();
   }
 
+  getProviderName(): string {
+    return this.paystackProvider.getName();
+  }
+
   private selectProvider(
     preferredProvider?: string,
     excludeProvider?: string,

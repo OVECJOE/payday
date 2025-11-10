@@ -31,6 +31,30 @@ export async function getScheduleAction(id: string) {
   }
 }
 
+export async function estimateScheduleFeeAction(
+  amount: number,
+): Promise<{
+  provider: string;
+  providerFee: number;
+  platformFee: number;
+  totalFee: number;
+} | null> {
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return null;
+  }
+
+  try {
+    const { token } = await requireAuth();
+    return await api.payments.estimateFee(token, {
+      amount,
+      type: 'transfer',
+    });
+  } catch (error) {
+    await handleServerActionError(error, '/dashboard/schedules/new');
+    return null;
+  }
+}
+
 export async function createScheduleAction(formData: FormData) {
   try {
     const { token } = await requireAuth();

@@ -407,6 +407,26 @@ export const api = {
       }, token),
   },
 
+  payments: {
+    estimateFee: (
+      token: string,
+      data: { amount: number; type?: 'transfer' | 'collection' },
+    ) =>
+      fetchWithAuth<{
+        provider: string;
+        providerFee: number;
+        platformFee: number;
+        totalFee: number;
+      }>(
+        '/payments/estimate-fee',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        token,
+      ),
+  },
+
   transactions: {
     list: (token: string, limit = 50, offset = 0) =>
       fetchWithAuth<{ transactions: Transaction[]; total: number }>(

@@ -42,21 +42,34 @@ export class PaymentProcessorService {
     private encryptionService: EncryptionService,
   ) {}
 
+  private readonly platformFeeRate = 0.003; // 0.3%
+  private readonly platformFeeCap = 50;
+  private readonly paystackTransferFlatFee = 10;
+  private readonly paystackCardRate = 0.015;
+  private readonly paystackCardFlat = 100;
+  private readonly paystackCardFlatThreshold = 2500;
+  private readonly paystackCardFeeCap = 2000;
+
   private async createPendingTransaction(
     schedule: RecurringSchedule,
     idempotencyKey: string,
   ): Promise<Transaction> {
+    const feeBreakdown = this.calculateTransferFee(Number(schedule.amount));
     const transaction = this.transactionRepository.create({
       idempotencyKey,
       userId: schedule.userId,
       scheduleId: schedule.id,
       recipientId: schedule.recipientId,
       amount: schedule.amount,
-      fee: 0,
+      fee: feeBreakdown.totalFee,
       type: TransactionType.SCHEDULED_PAYMENT,
       status: TransactionStatus.PENDING,
       provider: PaymentProvider.PAYSTACK,
       description: schedule.description,
+      metadata: {
+        ...(schedule.metadata || {}),
+        feeBreakdown,
+      },
     });
 
     return this.transactionRepository.save(transaction);
@@ -67,18 +80,23 @@ export class PaymentProcessorService {
     idempotencyKey: string,
     reason: string,
   ): Promise<Transaction> {
+    const feeBreakdown = this.calculateTransferFee(Number(schedule.amount));
     const transaction = this.transactionRepository.create({
       idempotencyKey,
       userId: schedule.userId,
       scheduleId: schedule.id,
       recipientId: schedule.recipientId,
       amount: schedule.amount,
-      fee: 0,
+      fee: feeBreakdown.totalFee,
       type: TransactionType.SCHEDULED_PAYMENT,
       status: TransactionStatus.FAILED,
       provider: PaymentProvider.PAYSTACK,
       failureReason: reason,
       description: schedule.description,
+      metadata: {
+        ...(schedule.metadata || {}),
+        feeBreakdown,
+      },
     });
 
     return this.transactionRepository.save(transaction);
@@ -146,6 +164,16 @@ export class PaymentProcessorService {
       transaction.providerResponse = paymentResult.data as Record<string, any>;
 
       if (paymentResult.success) {
+        const feeBreakdown = this.calculateTransferFee(
+          Number(schedule.amount),
+          paymentResult.data as Record<string, any>,
+        );
+        transaction.fee = feeBreakdown.totalFee;
+        transaction.metadata = {
+          ...(transaction.metadata ?? {}),
+          feeBreakdown,
+        };
+
         transaction.status =
           paymentResult.status === 'success'
             ? TransactionStatus.SUCCESS
@@ -307,5 +335,153 @@ export class PaymentProcessorService {
     }
 
     return transaction;
+  }
+
+  estimateTransferFee(amount: number): {
+    provider: string;
+    providerFee: number;
+    platformFee: number;
+    totalFee: number;
+  } {
+    const { providerFee, platformFee, totalFee } =
+      this.calculateTransferFee(amount);
+    return {
+      provider: this.paymentOrchestrator.getProviderName(),
+      providerFee,
+      platformFee,
+      totalFee,
+    };
+  }
+
+  estimateCollectionFee(amount: number): {
+    provider: string;
+    providerFee: number;
+    platformFee: number;
+    totalFee: number;
+  } {
+    const { providerFee, platformFee, totalFee } =
+      this.calculateCollectionFee(amount);
+    return {
+      provider: this.paymentOrchestrator.getProviderName(),
+      providerFee,
+      platformFee,
+      totalFee,
+    };
+  }
+
+  private calculateTransferFee(
+    amount: number,
+    providerData?: Record<string, any>,
+  ): { providerFee: number; platformFee: number; totalFee: number } {
+    const providerFee = this.calculateTransferProviderFee(amount, providerData);
+    const platformFee = this.calculatePlatformFee(amount);
+    const totalFee = this.roundCurrency(providerFee + platformFee);
+
+    return {
+      providerFee,
+      platformFee,
+      totalFee,
+    };
+  }
+
+  private calculateCollectionFee(
+    amount: number,
+    providerData?: Record<string, any>,
+  ): { providerFee: number; platformFee: number; totalFee: number } {
+    const providerFee = this.calculateCollectionProviderFee(
+      amount,
+      providerData,
+    );
+    const platformFee = this.calculatePlatformFee(amount);
+    const totalFee = this.roundCurrency(providerFee + platformFee);
+
+    return {
+      providerFee,
+      platformFee,
+      totalFee,
+    };
+  }
+
+  private calculateTransferProviderFee(
+    _amount: number,
+    providerData?: Record<string, any>,
+  ): number {
+    const extracted = this.extractProviderFee(providerData);
+    if (extracted !== null) {
+      return extracted;
+    }
+
+    return this.paystackTransferFlatFee;
+  }
+
+  private calculateCollectionProviderFee(
+    amount: number,
+    providerData?: Record<string, any>,
+  ): number {
+    const extracted = this.extractProviderFee(providerData);
+    if (extracted !== null) {
+      return extracted;
+    }
+
+    const percentageFee = amount * this.paystackCardRate;
+    const flatFee =
+      amount > this.paystackCardFlatThreshold ? this.paystackCardFlat : 0;
+    const total = percentageFee + flatFee;
+
+    return this.roundCurrency(Math.min(total, this.paystackCardFeeCap));
+  }
+
+  private calculatePlatformFee(amount: number): number {
+    if (amount <= 0) {
+      return 0;
+    }
+    return this.roundCurrency(
+      Math.min(amount * this.platformFeeRate, this.platformFeeCap),
+    );
+  }
+
+  private extractProviderFee(data?: Record<string, any>): number | null {
+    if (!data) {
+      return null;
+    }
+
+    const candidates = [
+      data.fee,
+      data.fees,
+      data.transfer_fee,
+      data.charged_fee,
+      data.charged_amount,
+    ];
+
+    for (const candidate of candidates) {
+      if (typeof candidate === 'number') {
+        return this.normalizeProviderFee(candidate);
+      }
+    }
+
+    if (typeof data.data === 'object' && data.data !== null) {
+      const nested = this.extractProviderFee(data.data as Record<string, any>);
+      if (nested !== null) {
+        return nested;
+      }
+    }
+
+    return null;
+  }
+
+  private normalizeProviderFee(rawFee: number): number {
+    if (Number.isNaN(rawFee)) {
+      return 0;
+    }
+
+    if (rawFee > 1000) {
+      return this.roundCurrency(rawFee / 100);
+    }
+
+    return this.roundCurrency(rawFee);
+  }
+
+  private roundCurrency(value: number): number {
+    return Math.round((value + Number.EPSILON) * 100) / 100;
   }
 }

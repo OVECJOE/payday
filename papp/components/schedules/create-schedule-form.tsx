@@ -1,12 +1,15 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import * as z from 'zod';
 import { toast } from 'sonner';
-import { createScheduleAction } from '@/app/actions/schedules';
+import {
+  createScheduleAction,
+  estimateScheduleFeeAction,
+} from '@/app/actions/schedules';
 import type { Recipient } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,9 +33,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { formatCurrency } from '@/lib/format';
-
-const FEE_PERCENT = 0.015; // 1.5%
-const FEE_FLAT = 100; // ₦100 flat fee (assumption)
 
 const scheduleSchema = z.object({
   recipientIds: z.array(z.string()).min(1, 'Select at least one recipient'),
@@ -66,9 +66,17 @@ interface CreateScheduleFormProps {
 export function CreateScheduleForm({ recipients }: CreateScheduleFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [isFeePending, startFeeTransition] = useTransition();
   const [isRecipientDialogOpen, setIsRecipientDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRecipientIds, setSelectedRecipientIds] = useState<string[]>([]);
+  const [feeEstimate, setFeeEstimate] = useState<{
+    provider: string;
+    providerFee: number;
+    platformFee: number;
+    totalFee: number;
+  } | null>(null);
+  const [feeError, setFeeError] = useState<string | null>(null);
 
   const {
     register,
@@ -107,10 +115,42 @@ export function CreateScheduleForm({ recipients }: CreateScheduleFormProps) {
     });
   }, [recipients, searchTerm]);
 
-  const estimatedFeePerRecipient =
-    amountValue > 0 ? amountValue * FEE_PERCENT + FEE_FLAT : 0;
-  const estimatedFeeTotal = estimatedFeePerRecipient * recipientCount;
-  const totalAmountPerRun = amountValue * recipientCount + estimatedFeeTotal;
+  const providerFeePerRecipient = feeEstimate?.providerFee ?? 0;
+  const platformFeePerRecipient = feeEstimate?.platformFee ?? 0;
+  const providerFeeTotal = providerFeePerRecipient * recipientCount;
+  const platformFeeTotal = platformFeePerRecipient * recipientCount;
+  const totalFeeAllRecipients = providerFeeTotal + platformFeeTotal;
+  const totalBaseAmount = amountValue * recipientCount;
+  const totalAmountPerRun = totalBaseAmount + totalFeeAllRecipients;
+  const providerLabel = feeEstimate
+    ? `${feeEstimate.provider.charAt(0).toUpperCase()}${feeEstimate.provider.slice(
+        1,
+      )}`
+    : null;
+
+  useEffect(() => {
+    if (!amountValue || amountValue <= 0) {
+      setFeeEstimate(null);
+      setFeeError(null);
+      return;
+    }
+
+    startFeeTransition(async () => {
+      try {
+        const result = await estimateScheduleFeeAction(amountValue);
+        if (result) {
+          setFeeEstimate(result);
+          setFeeError(null);
+        } else {
+          setFeeEstimate(null);
+        }
+      } catch (error) {
+        console.error(error);
+        setFeeEstimate(null);
+        setFeeError('Unable to estimate fees right now. Please try again.');
+      }
+    });
+  }, [amountValue]);
 
   const toggleRecipient = (recipientId: string) => {
     setSelectedRecipientIds((prev) => {
@@ -415,7 +455,7 @@ export function CreateScheduleForm({ recipients }: CreateScheduleFormProps) {
         <div className="space-y-3 rounded-lg border p-6">
           <h3 className="text-lg font-semibold">Fee breakdown</h3>
           <p className="text-sm text-muted-foreground">
-            We estimate provider fees using Paystack&apos;s standard pricing (1.5% + ₦100). International cards or special cases may vary.
+            Fees come directly from {providerLabel ?? 'our provider'} plus Payday&apos;s 0.3% service fee (capped at ₦50 per recipient). Figures refresh automatically as you adjust the amount.
           </p>
           <div className="rounded-md border bg-muted/30">
             <dl className="divide-y text-sm">
@@ -425,27 +465,64 @@ export function CreateScheduleForm({ recipients }: CreateScheduleFormProps) {
               </div>
               <div className="flex items-center justify-between px-4 py-3">
                 <dt>Base amount per run</dt>
-                <dd className="font-medium">{formatCurrency(amountValue * recipientCount || 0)}</dd>
+                <dd className="font-medium">
+                  {formatCurrency(totalBaseAmount || 0)}
+                </dd>
               </div>
               <div className="flex items-center justify-between px-4 py-3">
-                <dt>Estimated provider fee</dt>
+                <dt>
+                  {feeEstimate
+                    ? `${providerLabel} fee per run`
+                    : 'Provider fee per run'}
+                </dt>
                 <dd className="font-medium">
-                  {formatCurrency(estimatedFeeTotal || 0)}
+                  {isFeePending
+                    ? 'Calculating…'
+                    : formatCurrency(providerFeeTotal || 0)}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between px-4 py-3">
+                <dt>Payday service fee per run</dt>
+                <dd className="font-medium">
+                  {isFeePending
+                    ? 'Calculating…'
+                    : formatCurrency(platformFeeTotal || 0)}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between px-4 py-3">
+                <dt>Total fees per run</dt>
+                <dd className="font-medium">
+                  {isFeePending
+                    ? 'Calculating…'
+                    : formatCurrency(totalFeeAllRecipients || 0)}
                 </dd>
               </div>
               <div className="flex items-center justify-between px-4 py-3 font-semibold">
                 <dt>Total cost per run</dt>
-                <dd>{formatCurrency(totalAmountPerRun || 0)}</dd>
+                <dd>
+                  {isFeePending
+                    ? 'Calculating…'
+                    : formatCurrency(totalAmountPerRun || 0)}
+                </dd>
               </div>
             </dl>
           </div>
+          {feeError && (
+            <p className="text-sm text-destructive">{feeError}</p>
+          )}
         </div>
 
         <div className="space-y-3 rounded-lg border p-6">
           <h3 className="text-lg font-semibold">Schedule checklist</h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
-              • Ensure your wallet has at least <span className="font-medium">{formatCurrency(totalAmountPerRun || 0)}</span> before each run.
+              • Ensure your wallet has at least{' '}
+              <span className="font-medium">
+                {isFeePending
+                  ? 'Calculating…'
+                  : formatCurrency(totalAmountPerRun || 0)}
+              </span>{' '}
+              before each run.
             </li>
             <li>• Funds move automatically at the start time you selected.</li>
             <li>• You can pause or cancel a schedule at any time.</li>
