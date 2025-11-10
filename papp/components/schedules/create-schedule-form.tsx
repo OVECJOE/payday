@@ -273,7 +273,7 @@ export function CreateScheduleForm({ recipients }: CreateScheduleFormProps) {
                         )}
                       >
                         <Checkbox checked={isSelected} className="mt-0.5" />
-                        <div className="flex-1">
+                        <div className="flex-1 space-y-1">
                           <div className="flex items-center justify-between gap-2">
                             <span className="font-medium">{recipient.name}</span>
                             <span className="text-xs text-muted-foreground ml-auto text-right">
